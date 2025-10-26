@@ -13,6 +13,9 @@ const reverseShellCommand = document.querySelector("#reverse-shell-command");
 const bindShellCommand = document.querySelector("#bind-shell-command");
 const msfVenomCommand = document.querySelector("#msfvenom-command");
 const hoaxShellCommand = document.querySelector("#hoaxshell-command");
+const webCommand = document.querySelector("#web-command");
+const activeDirectoryCommand = document.querySelector("#active-directory-command");
+const commonServiceCommand = document.querySelector("#common-service-command");
 
 const FilterOperatingSystemType = {
     'All': 'all',
@@ -79,6 +82,30 @@ document.querySelector("#hoaxshell-tab").addEventListener("click", () => {
     });
 });
 
+document.querySelector("#web-tab").addEventListener("click", () => {
+    document.querySelector("#web-selection").innerHTML = "";
+    rsg.setState({
+        commandType: CommandType.WEB,
+        encoding: "None"
+    });
+});
+
+document.querySelector("#active-directory-tab").addEventListener("click", () => {
+    document.querySelector("#active-directory-selection").innerHTML = "";
+    rsg.setState({
+        commandType: CommandType.ActiveDirectory,
+        encoding: "None"
+    });
+});
+
+document.querySelector("#common-service-tab").addEventListener("click", () => {
+    document.querySelector("#common-service-selection").innerHTML = "";
+    rsg.setState({
+        commandType: CommandType.CommonService,
+        encoding: "None"
+    });
+});
+
 var rawLinkButtons = document.querySelectorAll('.raw-listener');
 for (const button of rawLinkButtons) {
     button.addEventListener("click", () => {
@@ -117,6 +144,18 @@ const parsePortOrDefault = function (value, defaultPort = 9001) {
     return isValidPort ? number : defaultPort;
 };
 
+const getDefaultSelectionForType = function (commandType) {
+    const items = filterCommandData(
+        rsgData.reverseShellCommands,
+        {
+            commandType,
+            filterOperatingSystem: FilterOperatingSystemType.All,
+            filterText: ''
+        }
+    );
+    return items.length > 0 ? items[0].name : '';
+};
+
 const rsg = {
     ip: (query.get('ip') || localStorage.getItem('ip') || '10.10.10.10').replace(/[^a-zA-Z0-9.\-]/g, ''),
     port: parsePortOrDefault(query.get('port') || localStorage.getItem('port')),
@@ -126,12 +165,15 @@ const rsg = {
     listener: query.get('listener') || localStorage.getItem('listener') || rsgData.listenerCommands[0][1],
     encoding: query.get('encoding') || localStorage.getItem('encoding') || 'None',
     selectedValues: {
-        [CommandType.ReverseShell]: filterCommandData(rsgData.reverseShellCommands, { commandType: CommandType.ReverseShell })[0].name,
-        [CommandType.BindShell]: filterCommandData(rsgData.reverseShellCommands, { commandType: CommandType.BindShell })[0].name,
-        [CommandType.MSFVenom]: filterCommandData(rsgData.reverseShellCommands, { commandType: CommandType.MSFVenom })[0].name,
-        [CommandType.HoaxShell]: filterCommandData(rsgData.reverseShellCommands, { commandType: CommandType.HoaxShell })[0].name,
+        [CommandType.ReverseShell]: getDefaultSelectionForType(CommandType.ReverseShell),
+        [CommandType.BindShell]: getDefaultSelectionForType(CommandType.BindShell),
+        [CommandType.MSFVenom]: getDefaultSelectionForType(CommandType.MSFVenom),
+        [CommandType.HoaxShell]: getDefaultSelectionForType(CommandType.HoaxShell),
+        [CommandType.WEB]: getDefaultSelectionForType(CommandType.WEB),
+        [CommandType.ActiveDirectory]: getDefaultSelectionForType(CommandType.ActiveDirectory),
+        [CommandType.CommonService]: getDefaultSelectionForType(CommandType.CommonService),
     },
-    commandType: CommandType.ReverseShell,
+    commandType: CommandType.CommonService,
     filterOperatingSystem: query.get('filterOperatingSystem') || localStorage.getItem('filterOperatingSystem') || FilterOperatingSystemType.All,
     filterText: query.get('filterText') || localStorage.getItem('filterText') || '',
 
@@ -151,6 +193,18 @@ const rsg = {
         [CommandType.HoaxShell]: {
             listSelection: '#hoaxshell-selection',
             command: '#hoaxshell-command'
+        },
+        [CommandType.WEB]: {
+            listSelection: '#web-selection',
+            command: '#web-command'
+        },
+        [CommandType.ActiveDirectory]: {
+            listSelection: '#active-directory-selection',
+            command: '#active-directory-command'
+        },
+        [CommandType.CommonService]: {
+            listSelection: '#common-service-selection',
+            command: '#common-service-command'
         }
     },
 
@@ -388,10 +442,6 @@ const rsg = {
             const clickEvent = () => {
                 rsg.selectedValues[rsg.commandType] = name;
                 rsg.update();
-
-                // if (document.querySelector('#auto-copy-switch').checked) {
-                //     rsg.copyToClipboard(reverseShellCommand.innerText)
-                // }
             }
 
             selectionButton.innerText = name;
@@ -441,6 +491,12 @@ const rsg = {
         $('#listener-advanced').collapse($('#listener-advanced-switch').prop('checked') ? 'show' :
             'hide')
         $('#revshell-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
+            'hide')
+        $('#web-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
+            'hide')
+        $('#active-directory-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
+            'hide')
+        $('#common-service-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
             'hide')
     }
 }
@@ -522,6 +578,46 @@ document.querySelector('#copy-hoaxshell-command').addEventListener('click', () =
     rsg.copyToClipboard(hoaxShellCommand.innerText)
 })
 
+document.querySelector('#copy-web-command').addEventListener('click', () => {
+    rsg.copyToClipboard(webCommand.innerText)
+})
+
+document.querySelector('#copy-active-directory-command').addEventListener('click', () => {
+    rsg.copyToClipboard(activeDirectoryCommand.innerText)
+})
+
+document.querySelector('#copy-common-service-command').addEventListener('click', () => {
+    rsg.copyToClipboard(commonServiceCommand.innerText)
+})
+
+reverseShellCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(reverseShellCommand.innerText)
+})
+
+bindShellCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(bindShellCommand.innerText)
+})
+
+msfVenomCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(msfVenomCommand.innerText)
+})
+
+hoaxShellCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(hoaxShellCommand.innerText)
+})
+
+webCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(webCommand.innerText)
+})
+
+activeDirectoryCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(activeDirectoryCommand.innerText)
+})
+
+commonServiceCommand.addEventListener('click', () => {
+    rsg.copyToClipboard(commonServiceCommand.innerText)
+})
+
 var downloadButton = document.querySelectorAll(".download-svg");
 for (const Dbutton of downloadButton) {
     Dbutton.addEventListener("click", () => {
@@ -556,4 +652,3 @@ $(function () {
 
 // TODO: add a random fifo for netcat mkfifo
 //let randomId = Math.random().toString(36).substring(2, 4);
-

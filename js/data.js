@@ -3,7 +3,10 @@ const CommandType = {
     'ReverseShell': 'ReverseShell',
     'BindShell': 'BindShell',
     'MSFVenom': 'MSFVenom',
-    'HoaxShell': 'HoaxShell'
+    'HoaxShell': 'HoaxShell',
+    'WEB': 'WEB',
+    'ActiveDirectory': 'ActiveDirectory',
+    'CommonService': 'CommonService'
 };
 
 const withCommandType = function (commandType, elements) {
@@ -594,6 +597,70 @@ const hoaxShellCommands =  withCommandType(
     ]
 );
 
+
+const webCommands = withCommandType(
+    CommandType.WEB,
+    [
+        {
+            "name": "Nmap Web Ports",
+            "command": "nmap -sC -sV -p 80,443 {ip}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "Gobuster Directory Bruteforce",
+            "command": "gobuster dir -u http://{ip}:{port}/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "WhatWeb Fingerprint",
+            "command": "whatweb http://{ip}:{port}/",
+            "meta": ["linux", "mac"]
+        }
+    ]
+);
+
+const activeDirectoryCommands = withCommandType(
+    CommandType.ActiveDirectory,
+    [
+        {
+            "name": "bloodhound-python Collection",
+            "command": "bloodhound-python -d example.com -u USER -p PASS -ns {ip} --zip",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "GetADUsers Enumeration",
+            "command": "GetADUsers.py domain/user:password@{ip} -all",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "CrackMapExec SMB Sweep",
+            "command": "crackmapexec smb {ip} -u USER -p PASS --shares",
+            "meta": ["linux", "mac", "windows"]
+        }
+    ]
+);
+
+const commonServiceCommands = withCommandType(
+    CommandType.CommonService,
+    [
+        {
+            "name": "Nmap Default Scripts",
+            "command": "nmap -sC -sV -Pn {ip}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "Netcat Banner Grab",
+            "command": "nc -nv {ip} {port}",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "Enum4linux-ng Audit",
+            "command": "enum4linux-ng -A {ip}",
+            "meta": ["linux", "mac"]
+        }
+    ]
+);
+
 const rsgData = {
 
     listenerCommands: [
@@ -628,7 +695,10 @@ const rsgData = {
         ...reverseShellCommands,
         ...bindShellCommands,
         ...msfvenomCommands,
-        ...hoaxShellCommands
+        ...hoaxShellCommands,
+        ...webCommands,
+        ...activeDirectoryCommands,
+        ...commonServiceCommands
     ]
 };
 
