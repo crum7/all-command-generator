@@ -1,12 +1,11 @@
-# reverse-shell-generator
+# All Command Generator
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-Hosted Reverse Shell generator with a ton of functionality -- (great for CTFs)
-<br> [![Netlify Status](https://api.netlify.com/api/v1/badges/46dbabe0-23b7-42e6-b04b-e1769dc455ce/deploy-status)](https://app.netlify.com/sites/brave-swartz-5dcdab/deploys)
+Modern web UI for crafting reverse shells, bind shells, AD helpers, web payloads, and pentest snippets — all from one place.
 
 ### Hosted Instance
-https://revshells.com
+https://crum7.github.io/reverse-shell-plus-pentest-generator/
 
 ### Features
 
@@ -20,6 +19,15 @@ https://revshells.com
 - HoaxShell integration with custom listener (see link below for more information) | Credit: https://github.com/t3l3machus
 - Interactive Live2D assistant that responds to clicks with motions and comments (ships with bundled offline assets so it works without external CDNs)
 
+### What's New In This Fork?
+
+This fork focuses on a friendlier UI/UX and a self-contained front-end:
+
+- **Live2D companion** bundled locally (桃瀬ひより from the official Live2D samples) with double-density rendering for crisp animation, but disabled by default so it never blocks the interface.
+- **Offline-ready vendor packages** for PixiJS, Cubism core, and the Live2D runtime under `assets/live2d/libs/`, removing reliance on external CDNs.
+- **Layout refinements** including a dark-themed GitHub footer link, refined spacing, and a repositioned Live2D canvas that keeps attention on the command builder without covering form controls.
+- **Accessibility tweaks** to prevent the canvas from capturing focus, and hover/interaction adjustments that keep the UI responsive even on touch devices.
+
 ### HoaxShell Listener Docs
 
 [https://github.com/t3l3machus/hoaxshell/tree/main/revshells](https://github.com/t3l3machus/hoaxshell/tree/main/revshells)
@@ -30,19 +38,19 @@ https://revshells.com
 
 ## Dev
 
-It's recommended to use the netlify dev command if you're wanting to modify any of the server functions, such as for raw link support:
+For local development you can run Parcel/Netlify as before, or simply open `index.html` with a static server (no build step required). If you rely on the Netlify functions, use:
 
-```
+```bash
 npx netlify dev
 ```
 
 ## Using Docker
 Simply run the following commands within this repository to spin up the instance locally using a Docker container
 
-```
-docker build -t reverse_shell_generator .
+```bash
+docker build -t all_command_generator .
 
-docker run -d -p 80:80 reverse_shell_generator
+docker run -d -p 80:80 all_command_generator
 ```
 
 Browse to http://localhost:80
@@ -55,6 +63,7 @@ The interface now includes a Live2D character that offers quick encouragement wh
 - Behaviour and comments can be customised in `js/live2d.js`.
 - The model adapts to the selected theme (dark / light / meme) and keeps animation quality high by rendering at double density.
 - The bundled model is 「桃瀬ひより」 provided on the official Live2D sample page (https://www.live2d.com/learn/sample/).
+- The canvas ships disabled so it never interferes with the UI; enable interactions by removing the `live2d-disabled` class on `#live2d-container` if you want the character to respond to clicks.
 
 If you prefer a static UI, you can hide the container by removing or commenting out the block around `#live2d-container` in `index.html`.
 
