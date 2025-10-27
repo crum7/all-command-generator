@@ -11,6 +11,11 @@
     <script src="assets/popper-1.16.1.min.js"></script>
     <script src="assets/bootstrap-4.5.2.min.js"></script>
     <script src="assets/axios.min.js"></script>
+    <!-- Live2D Libraries -->
+    <script src="assets/live2d/libs/live2dcubismcore.min.js"></script>
+    <script src="assets/live2d/libs/live2d.min.js"></script>
+    <script src="assets/live2d/libs/pixi.min.js"></script>
+    <script src="assets/live2d/libs/pixi-live2d-display.min.js"></script>
     <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/light-mode.css">
     <link rel="stylesheet" href="css/meme-mode.css">
@@ -971,6 +976,12 @@
             </div>
         </div>
 
+    <!-- Live2D Character Container -->
+    <div id="live2d-container">
+        <canvas id="live2d-canvas"></canvas>
+        <div id="live2d-comment" class="live2d-comment"></div>
+    </div>
+
     <!-- RSG data -->
     <script src="js/data.js"></script>
 
@@ -979,6 +990,9 @@
 
     <!-- Light switch -->
     <script src="js/light-mode-switch.js"></script>
+
+    <!-- Live2D Character -->
+    <script src="js/live2d.js"></script>
 
     <!-- Main js -->
     <script src="js/script.js"></script>
