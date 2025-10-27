@@ -602,7 +602,7 @@ const webCommands = withCommandType(
     CommandType.WEB,
     [
         {
-            "name": "Gobuster Directory Bruteforce",
+            "name": "Gobuster Directory",
             "command": "gobuster dir -u http://{ip}:{port}/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt",
             "meta": ["linux", "mac"]
         },

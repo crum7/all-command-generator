@@ -81,80 +81,156 @@
         <div class="row">
 
             <!-- IP & Port Configuration -->
-            <div class="col-12 col-md-6 mb-4">
-                <div class="card shadow h-100">
+            <div class="col-12 mb-4">
+                <div class="card shadow">
                     <div class="card-body">
                         <h5 class="card-title mb-0">
                             <b>IP & Port</b>
                         </h5>
 
                         <!-- card-text -->
-                        <div class="card-text h-100">
-                            <form class="row justify-content-center align-items-center h-100">
-
-                                                                <!-- IP -->
-                                <div class="col-auto mt-4">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span id="ip-label" class="input-group-text">IP</span>
+                        <div class="card-text">
+                            <form>
+                                <!-- First row: IP, Port, Domain -->
+                                <div class="row mt-3">
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="ip-label" class="input-group-text">IP</span>
+                                            </div>
+                                            <input id="ip" type="text" class="form-control text-center"
+                                                aria-label="IP" aria-describedby="ip-label">
                                         </div>
-                                        <input id="ip" type="text" class="form-control form-control-lg text-center px-1"
-                                            size="12VW" aria-label="IP"
-                                            aria-describedby="ip-label">
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="port-label" class="input-group-text">Port</span>
+                                            </div>
+                                            <input id="port" type="text" class="form-control text-center"
+                                                maxlength="5" aria-label="Port" aria-describedby="port-label">
+                                            <div class="input-group-append">
+                                                <button id="inc-port" class="btn btn-secondary btn-sm" type="button"
+                                                    data-toggle="tooltip" title="Increase port number by one">
+                                                    +1
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="domain-label" class="input-group-text">Domain</span>
+                                            </div>
+                                            <input id="domain" type="text" class="form-control text-center"
+                                                aria-label="Domain" aria-describedby="domain-label">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="fqdn-label" class="input-group-text">FQDN</span>
+                                            </div>
+                                            <input id="fqdn" type="text" class="form-control text-center"
+                                                aria-label="FQDN" aria-describedby="fqdn-label">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Port -->
-                                <div class="col-auto mt-4">
-                                    <div class="input-group" data-toggle="tooltip">
-                                        <div class="input-group-prepend">
-                                            <span id="port-label" class="input-group-text">Port</span>
+                                <!-- Second row: CIDR and context-specific fields in one line -->
+                                <div class="row mt-3">
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="cidr-label" class="input-group-text">CIDR</span>
+                                            </div>
+                                            <input id="cidr" type="text" class="form-control text-center"
+                                                aria-label="CIDR" aria-describedby="cidr-label">
                                         </div>
-                                        <input id="port" type="text" class="form-control form-control-lg text-center"
-                                            size="4vw" maxlength="5" aria-label="Port"
-                                            aria-describedby="port-label">
-                                        <div class="input-group-append">
-                                            <button id="inc-port" class="btn btn-secondary btn-sm" type="button"
-                                                style="font-size: 1rem" data-toggle="tooltip"
-                                                title="Increase port number by one">
-                                                +1
-                                            </button>
+                                    </div>
+
+                                    <!-- Web-specific fields inline -->
+                                    <div id="web-fields" class="context-fields col-md-3" style="display: none;">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="path-label" class="input-group-text">Path</span>
+                                            </div>
+                                            <input id="path" type="text" class="form-control text-center"
+                                                aria-label="Path" aria-describedby="path-label" placeholder="/admin/login.php">
+                                        </div>
+                                    </div>
+
+                                    <!-- AD-specific fields inline -->
+                                    <div class="col-md-3">
+                                        <div id="ad-domain-field" class="context-fields" style="display: none;">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span id="ad-domain-label" class="input-group-text">AD Domain</span>
+                                                </div>
+                                                <input id="ad-domain" type="text" class="form-control text-center"
+                                                    aria-label="AD Domain" aria-describedby="ad-domain-label" placeholder="CORP.LOCAL">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="user-field" class="context-fields" style="display: none;">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span id="user-label" class="input-group-text">User</span>
+                                                </div>
+                                                <input id="user" type="text" class="form-control text-center"
+                                                    aria-label="User" aria-describedby="user-label" placeholder="Administrator">
+                                            </div>
+                                        </div>
+                                        <div id="service-user-field" class="context-fields" style="display: none;">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span id="service-user-label" class="input-group-text">User</span>
+                                                </div>
+                                                <input id="service-user" type="text" class="form-control text-center"
+                                                    aria-label="Service User" aria-describedby="service-user-label" placeholder="admin">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="password-field" class="context-fields" style="display: none;">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span id="password-label" class="input-group-text">Password</span>
+                                                </div>
+                                                <input id="password" type="password" class="form-control text-center"
+                                                    aria-label="Password" aria-describedby="password-label" placeholder="Password123">
+                                            </div>
+                                        </div>
+                                        <div id="service-password-field" class="context-fields" style="display: none;">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span id="service-password-label" class="input-group-text">Password</span>
+                                                </div>
+                                                <input id="service-password" type="password" class="form-control text-center"
+                                                    aria-label="Service Password" aria-describedby="service-password-label" placeholder="password">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Third row: AD-specific NT Hash field (if needed) -->
+                                <div id="ad-hash-row" class="context-fields row mt-3" style="display: none;">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span id="nthash-label" class="input-group-text">NT Hash</span>
+                                            </div>
+                                            <input id="nthash" type="text" class="form-control text-center"
+                                                aria-label="NT Hash" aria-describedby="nthash-label" placeholder="aad3b435b51404eeaad3b435b51404ee">
                                         </div>
                                     </div>
                                 </div>
 
-<!-- Domain -->
-                                <div class="col-12 mt-4">
-                                    <div class="input-group w-100">
-                                        <div class="input-group-prepend">
-                                            <span id="domain-label" class="input-group-text">Domain</span>
-                                        </div>
-                                        <input id="domain" type="text" class="form-control form-control-lg text-center"
-                                            aria-label="Domain" aria-describedby="domain-label">
-                                    </div>
-                                </div>
-
-                                <!-- FQDN -->
-                                <div class="col-12 mt-4">
-                                    <div class="input-group w-100">
-                                        <div class="input-group-prepend">
-                                            <span id="fqdn-label" class="input-group-text">FQDN</span>
-                                        </div>
-                                        <input id="fqdn" type="text" class="form-control form-control-lg text-center"
-                                            aria-label="FQDN" aria-describedby="fqdn-label">
-                                    </div>
-                                </div>
-
-                                <!-- CIDR -->
-                                <div class="col-12 mt-4">
-                                    <div class="input-group w-100">
-                                        <div class="input-group-prepend">
-                                            <span id="cidr-label" class="input-group-text">CIDR</span>
-                                        </div>
-                                        <input id="cidr" type="text" class="form-control form-control-lg text-center"
-                                            aria-label="CIDR" aria-describedby="cidr-label">
-                                    </div>
-                                </div>
 
                                 <div id="port-privileges-warning" class="col-12 small text-center"
                                     style="visibility: hidden">
@@ -170,56 +246,6 @@
                 </div>
             </div>
             <!-- /IP & Port Configuration -->
-
-            <!-- Listener -->
-            <div class="col-12 col-md-6 mb-4">
-                <div class="card shadow h-100">
-                    <div class="card-body">
-
-                        <!-- Advanced switch -->
-                        <div class="custom-control custom-switch float-right">
-                            <input id="listener-advanced-switch" type="checkbox" class="custom-control-input" checked>
-                            <label for="listener-advanced-switch" class="custom-control-label small pr-2 pb-1"
-                                style="padding-top:2px" data-toggle="tooltip" title="Display advanced settings">
-                                Advanced
-                            </label>
-                        </div>
-
-                        <h5 class="card-title"><b>Listener</b></h5>
-
-                        <div class="card-text">
-
-                            <!-- Command -->
-                            <div class="row justify-content-center">
-                                <div class="col-auto position-relative" style="min-width: 15vw">
-                                    <pre class="prompt-sign">🚀</pre>
-                                    <pre id="listener-command" class="bg-dark border text-wrap text-break p-4 pl-5 mb-2" spellcheck="false"
-                                        style="outline: none; font-size:1em;" contenteditable="true"></pre>
-                                </div>
-                            </div>
-
-                            <!-- Advanced section-->
-                            <form class="row justify-content-center collapse" id="listener-advanced">
-                                <label for="listener-selection" class="col-auto col-form-label">Type</label>
-                                <div class="col-auto">
-                                    <select class="custom-select" id="listener-selection">
-                                        <!-- filled by init()-->
-                                    </select>
-                                </div>
-                            </form>
-
-                        </div>
-                        <!-- /card-text -->
-
-                        <!-- Copy button -->
-                        <button id="copy-listener" type="button" class="btn btn-primary float-right"
-                            data-toggle="tooltip" title="Copy to clipboard">
-                            Copy
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- /listener -->
 
         </div>
 

@@ -5,13 +5,57 @@ const portInput = document.querySelector("#port");
 const domainInput = document.querySelector("#domain");
 const fqdnInput = document.querySelector("#fqdn");
 const cidrInput = document.querySelector("#cidr");
-const listenerSelect = document.querySelector("#listener-selection");
+
+// Context-specific field selectors
+const pathInput = document.querySelector("#path");
+const adDomainInput = document.querySelector("#ad-domain");
+const userInput = document.querySelector("#user");
+const passwordInput = document.querySelector("#password");
+const ntHashInput = document.querySelector("#nthash");
+const serviceUserInput = document.querySelector("#service-user");
+const servicePasswordInput = document.querySelector("#service-password");
 const shellSelect = document.querySelector("#shell");
 // const autoCopySwitch = document.querySelector("#auto-copy-switch");
 const operatingSystemSelect = document.querySelector("#os-options");
 const encodingSelect = document.querySelector('#encoding');
 const searchBox = document.querySelector('#searchBox');
-const listenerCommand = document.querySelector("#listener-command");
+
+// Function to show/hide context-specific fields
+const updateContextFields = (commandType) => {
+    // Hide all context fields first
+    const allContextFields = document.querySelectorAll('.context-fields');
+    allContextFields.forEach(field => field.style.display = 'none');
+
+    // Update main field labels based on context
+    const domainLabel = document.querySelector('#domain-label');
+    const fqdnLabel = document.querySelector('#fqdn-label');
+
+    switch (commandType) {
+        case CommandType.WEB:
+            document.querySelector('#web-fields').style.display = 'block';
+            domainLabel.textContent = 'Web Domain';
+            fqdnLabel.textContent = 'Web FQDN';
+            break;
+        case CommandType.ActiveDirectory:
+            document.querySelector('#ad-domain-field').style.display = 'block';
+            document.querySelector('#user-field').style.display = 'block';
+            document.querySelector('#password-field').style.display = 'block';
+            document.querySelector('#ad-hash-row').style.display = 'block';
+            domainLabel.textContent = 'Domain';
+            fqdnLabel.textContent = 'FQDN';
+            break;
+        case CommandType.CommonService:
+            document.querySelector('#service-user-field').style.display = 'block';
+            document.querySelector('#service-password-field').style.display = 'block';
+            domainLabel.textContent = 'Domain';
+            fqdnLabel.textContent = 'FQDN';
+            break;
+        default:
+            domainLabel.textContent = 'Domain';
+            fqdnLabel.textContent = 'FQDN';
+            break;
+    }
+};
 const reverseShellCommand = document.querySelector("#reverse-shell-command");
 const bindShellCommand = document.querySelector("#bind-shell-command");
 const msfVenomCommand = document.querySelector("#msfvenom-command");
@@ -48,12 +92,14 @@ operatingSystemSelect.addEventListener("change", (event) => {
 });
 
 document.querySelector("#reverse-tab").addEventListener("click", () => {
+    updateContextFields(CommandType.ReverseShell);
     rsg.setState({
         commandType: CommandType.ReverseShell,
     });
 })
 
 document.querySelector("#bind-tab").addEventListener("click", () => {
+    updateContextFields(CommandType.BindShell);
     rsg.setState({
         commandType: CommandType.BindShell,
         encoding: "None"
@@ -62,6 +108,7 @@ document.querySelector("#bind-tab").addEventListener("click", () => {
 
 document.querySelector("#bind-tab").addEventListener("click", () => {
     document.querySelector("#bind-shell-selection").innerHTML = "";
+    updateContextFields(CommandType.BindShell);
     rsg.setState({
         commandType: CommandType.BindShell
 
@@ -70,6 +117,7 @@ document.querySelector("#bind-tab").addEventListener("click", () => {
 
 document.querySelector("#msfvenom-tab").addEventListener("click", () => {
     document.querySelector("#msfvenom-selection").innerHTML = "";
+    updateContextFields(CommandType.MSFVenom);
     rsg.setState({
         commandType: CommandType.MSFVenom,
 encoding: "None"
@@ -79,6 +127,7 @@ encoding: "None"
 
 document.querySelector("#hoaxshell-tab").addEventListener("click", () => {
     document.querySelector("#hoaxshell-selection").innerHTML = "";
+    updateContextFields(CommandType.HoaxShell);
     rsg.setState({
         commandType: CommandType.HoaxShell,
 		encoding: "None"
@@ -87,6 +136,7 @@ document.querySelector("#hoaxshell-tab").addEventListener("click", () => {
 
 document.querySelector("#web-tab").addEventListener("click", () => {
     document.querySelector("#web-selection").innerHTML = "";
+    updateContextFields(CommandType.WEB);
     rsg.setState({
         commandType: CommandType.WEB,
         encoding: "None"
@@ -95,6 +145,7 @@ document.querySelector("#web-tab").addEventListener("click", () => {
 
 document.querySelector("#active-directory-tab").addEventListener("click", () => {
     document.querySelector("#active-directory-selection").innerHTML = "";
+    updateContextFields(CommandType.ActiveDirectory);
     rsg.setState({
         commandType: CommandType.ActiveDirectory,
         encoding: "None"
@@ -103,6 +154,7 @@ document.querySelector("#active-directory-tab").addEventListener("click", () => 
 
 document.querySelector("#common-service-tab").addEventListener("click", () => {
     document.querySelector("#common-service-selection").innerHTML = "";
+    updateContextFields(CommandType.CommonService);
     rsg.setState({
         commandType: CommandType.CommonService,
         encoding: "None"
@@ -118,7 +170,7 @@ for (const button of rawLinkButtons) {
 }
 
 const filterCommandData = function (data, { commandType, filterOperatingSystem = FilterOperatingSystemType.All, filterText = '' }) {
-    return data.filter(item => {
+    const filtered = data.filter(item => {
 
         if (!item.meta.includes(commandType)) {
             return false;
@@ -128,6 +180,13 @@ const filterCommandData = function (data, { commandType, filterOperatingSystem =
         var hasTextMatch = item.name.toLowerCase().indexOf(filterText.toLowerCase()) >= 0;
         return hasOperatingSystemMatch && hasTextMatch;
     });
+
+    // Sort with favorites at the top (only if rsg is fully initialized)
+    if (typeof rsg !== 'undefined' && rsg.sortWithFavorites) {
+        return rsg.sortWithFavorites(filtered, commandType);
+    }
+
+    return filtered;
 }
 
 const query = new URLSearchParams(location.hash.substring(1));
@@ -148,14 +207,12 @@ const parsePortOrDefault = function (value, defaultPort = 9001) {
 };
 
 const getDefaultSelectionForType = function (commandType) {
-    const items = filterCommandData(
-        rsgData.reverseShellCommands,
-        {
-            commandType,
-            filterOperatingSystem: FilterOperatingSystemType.All,
-            filterText: ''
+    const items = rsgData.reverseShellCommands.filter(item => {
+        if (!item.meta.includes(commandType)) {
+            return false;
         }
-    );
+        return true;
+    });
     return items.length > 0 ? items[0].name : '';
 };
 
@@ -165,10 +222,15 @@ const rsg = {
     domain: (query.get('domain') || localStorage.getItem('domain') || '').replace(/[^\w.\-]/g, ''),
     fqdn: (query.get('fqdn') || localStorage.getItem('fqdn') || '').replace(/[^\w.\-]/g, ''),
     cidr: (query.get('cidr') || localStorage.getItem('cidr') || '').replace(/[^0-9a-zA-Z.\-/:]/g, ''),
+    path: (query.get('path') || localStorage.getItem('path') || '').replace(/[^a-zA-Z0-9.\-/_]/g, ''),
+    adDomain: (query.get('adDomain') || localStorage.getItem('adDomain') || '').replace(/[^\w.\-]/g, ''),
+    user: (query.get('user') || localStorage.getItem('user') || '').replace(/[^\w.\-@]/g, ''),
+    password: query.get('password') || localStorage.getItem('password') || '',
+    nthash: (query.get('nthash') || localStorage.getItem('nthash') || '').replace(/[^a-fA-F0-9]/g, ''),
+    favorites: JSON.parse(localStorage.getItem('favorites') || '{}'),
     payload: query.get('payload') || localStorage.getItem('payload') || 'windows/x64/meterpreter/reverse_tcp',
     payload: query.get('type') || localStorage.getItem('type') || 'cmd-curl',
     shell: query.get('shell') || localStorage.getItem('shell') || rsgData.shells[0],
-    listener: query.get('listener') || localStorage.getItem('listener') || rsgData.listenerCommands[0][1],
     encoding: query.get('encoding') || localStorage.getItem('encoding') || 'None',
     selectedValues: {
         [CommandType.ReverseShell]: getDefaultSelectionForType(CommandType.ReverseShell),
@@ -245,6 +307,51 @@ const rsg = {
     getFQDN: () => rsg.fqdn,
 
     getCIDR: () => rsg.cidr,
+
+    getPath: () => rsg.path,
+
+    getADDomain: () => rsg.adDomain,
+
+    getUser: () => rsg.user,
+
+    getPassword: () => rsg.password,
+
+    getNTHash: () => rsg.nthash,
+
+    // Favorite functionality
+    isFavorite: (commandType, commandName) => {
+        return rsg.favorites[commandType] && rsg.favorites[commandType].includes(commandName);
+    },
+
+    toggleFavorite: (commandType, commandName) => {
+        if (!rsg.favorites[commandType]) {
+            rsg.favorites[commandType] = [];
+        }
+
+        const index = rsg.favorites[commandType].indexOf(commandName);
+        if (index === -1) {
+            rsg.favorites[commandType].push(commandName);
+        } else {
+            rsg.favorites[commandType].splice(index, 1);
+        }
+
+        // Save to localStorage
+        localStorage.setItem('favorites', JSON.stringify(rsg.favorites));
+    },
+
+    sortWithFavorites: (items, commandType) => {
+        return items.sort((a, b) => {
+            const aIsFav = rsg.isFavorite(commandType, a.name);
+            const bIsFav = rsg.isFavorite(commandType, b.name);
+
+            // Favorites first
+            if (aIsFav && !bIsFav) return -1;
+            if (!aIsFav && bIsFav) return 1;
+
+            // Within same category (both favorite or both not), sort alphabetically
+            return a.name.localeCompare(b.name);
+        });
+    },
 
     getSelectedCommandName: () => {
         return rsg.selectedValues[rsg.commandType];
@@ -328,9 +435,10 @@ const rsg = {
     },
 
     highlightParameters: (text, encoder) => {
-        const parameters = ['{ip}', '{port}', '{shell}', '{domain}', '{fqdn}', '{cidr}',
+        const parameters = ['{ip}', '{port}', '{shell}', '{domain}', '{fqdn}', '{cidr}', '{path}', '{user}', '{password}', '{nthash}',
             encodeURI('{ip}'), encodeURI('{port}'), encodeURI('{shell}'),
-            encodeURI('{domain}'), encodeURI('{fqdn}'), encodeURI('{cidr}')
+            encodeURI('{domain}'), encodeURI('{fqdn}'), encodeURI('{cidr}'), encodeURI('{path}'),
+            encodeURI('{user}'), encodeURI('{password}'), encodeURI('{nthash}')
         ];
 
         parameters.forEach((param) => {
@@ -341,25 +449,27 @@ const rsg = {
     },
 
     init: () => {
-        rsg.initListenerSelection()
         rsg.initShells()
+        rsg.syncFieldValues()
+        // Initialize context fields
+        updateContextFields(rsg.commandType);
     },
 
-    initListenerSelection: () => {
-        rsgData.listenerCommands.forEach((listenerData, i) => {
-            const type = listenerData[0];
-            const command = listenerData[1];
-
-            const option = document.createElement("option");
-
-            option.value = command;
-            option.selected = rsg.listener === option.value;
-            option.classList.add("listener-option");
-            option.innerText = type;
-
-            listenerSelect.appendChild(option);
-        })
+    syncFieldValues: () => {
+        ipInput.value = rsg.ip;
+        portInput.value = rsg.port;
+        domainInput.value = rsg.domain;
+        fqdnInput.value = rsg.fqdn;
+        cidrInput.value = rsg.cidr;
+        pathInput.value = rsg.path;
+        adDomainInput.value = rsg.adDomain;
+        userInput.value = rsg.user;
+        passwordInput.value = rsg.password;
+        ntHashInput.value = rsg.nthash;
+        serviceUserInput.value = rsg.user;
+        servicePasswordInput.value = rsg.password;
     },
+
 
     initShells: () => {
         rsgData.shells.forEach((shell, i) => {
@@ -392,22 +502,20 @@ const rsg = {
             .replaceAll(encoder('{shell}'), encoder(rsg.getShell()))
             .replaceAll(encoder('{domain}'), encoder(rsg.getDomain()))
             .replaceAll(encoder('{fqdn}'), encoder(rsg.getFQDN()))
-            .replaceAll(encoder('{cidr}'), encoder(rsg.getCIDR()));
+            .replaceAll(encoder('{cidr}'), encoder(rsg.getCIDR()))
+            .replaceAll(encoder('{path}'), encoder(rsg.getPath()))
+            .replaceAll(encoder('{user}'), encoder(rsg.getUser()))
+            .replaceAll(encoder('{password}'), encoder(rsg.getPassword()))
+            .replaceAll(encoder('{nthash}'), encoder(rsg.getNTHash()));
     },
 
     update: () => {
-        rsg.updateListenerCommand()
         rsg.updateTabList()
         rsg.updateReverseShellCommand()
         rsg.updateValues()
     },
 
     updateValues: () => {
-        const listenerOptions = listenerSelect.querySelectorAll(".listener-option");
-        listenerOptions.forEach((option)  => {
-            option.selected = rsg.listener === option.value;
-        });
-
         const shellOptions = shellSelect.querySelectorAll(".shell-option");
         shellOptions.forEach((option) => {
             option.selected = rsg.shell === option.value;
@@ -462,12 +570,53 @@ const rsg = {
                 selectionButton.classList.add("active");
             }
 
-            const clickEvent = () => {
+            const clickEvent = (e) => {
+                // Don't trigger selection if clicking on star button
+                if (e.target.classList.contains('favorite-star')) {
+                    return;
+                }
                 rsg.selectedValues[rsg.commandType] = name;
                 rsg.update();
             }
 
-            selectionButton.innerText = name;
+            // Create container for text and star
+            const contentContainer = document.createElement("div");
+            contentContainer.classList.add("d-flex", "justify-content-between", "align-items-center", "w-100");
+
+            const commandText = document.createElement("span");
+            commandText.innerText = name;
+
+            // Create star button
+            const starButton = document.createElement("span");
+            starButton.classList.add("favorite-star");
+            const isFavorite = rsg.isFavorite ? rsg.isFavorite(rsg.commandType, name) : false;
+            starButton.innerHTML = isFavorite ? "★" : "☆";
+            starButton.style.cursor = "pointer";
+            starButton.style.color = isFavorite ? "#ffd700" : "#ccc";
+            starButton.style.fontSize = "16px";
+            starButton.style.marginLeft = "auto";
+            starButton.setAttribute("title", "Toggle favorite");
+
+            starButton.addEventListener("click", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (rsg.toggleFavorite) {
+                    rsg.toggleFavorite(rsg.commandType, name);
+                    // Update star appearance
+                    const isFav = rsg.isFavorite ? rsg.isFavorite(rsg.commandType, name) : false;
+                    starButton.innerHTML = isFav ? "★" : "☆";
+                    starButton.style.color = isFav ? "#ffd700" : "#ccc";
+                    // Re-render list to move favorites to top
+                    if (rsg.updateTabList) {
+                        rsg.updateTabList();
+                    }
+                }
+            });
+
+            contentContainer.appendChild(commandText);
+            contentContainer.appendChild(starButton);
+            selectionButton.appendChild(contentContainer);
+
             selectionButton.classList.add("list-group-item", "list-group-item-action");
             selectionButton.addEventListener("click", clickEvent);
 
@@ -480,27 +629,6 @@ const rsg = {
         }
     },
 
-    updateListenerCommand: () => {
-        const privilegeWarning = document.querySelector("#port-privileges-warning");
-        let command = listenerSelect.value;
-        command = rsg.highlightParameters(command)
-        command = command.replace('{port}', rsg.getPort())
-        command = command.replace('{ip}', rsg.getIP())
-        command = command.replace('{payload}', rsg.getPayload())
-        command = command.replace('{type}', rsg.getType())
-        command = command.replace('{domain}', rsg.getDomain())
-        command = command.replace('{fqdn}', rsg.getFQDN())
-        command = command.replace('{cidr}', rsg.getCIDR())
-
-        if (rsg.getPort() < 1024) {
-            privilegeWarning.style.visibility = "visible";
-            command = `<span class="highlighted-warning">sudo</span> ${command}`
-        } else {
-            privilegeWarning.style.visibility = "hidden";
-        }
-
-        listenerCommand.innerHTML = command;
-    },
 
     updateReverseShellSelection: () => {
         document.querySelector(".list-group-item.active") ?.classList.remove("active");
@@ -516,8 +644,6 @@ const rsg = {
     },
 
     updateSwitchStates: () => {
-        $('#listener-advanced').collapse($('#listener-advanced-switch').prop('checked') ? 'show' :
-            'hide')
         $('#revshell-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
             'hide')
         $('#web-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
@@ -573,11 +699,54 @@ cidrInput.addEventListener("input", (e) => {
     })
 });
 
-listenerSelect.addEventListener("change", (e) => {
+// Add event listeners for new context-specific fields
+pathInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^a-zA-Z0-9.\-/_]/g, '');
     rsg.setState({
-        listener: e.target.value
+        path: sanitized
     })
 });
+
+adDomainInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^\w.\-]/g, '');
+    rsg.setState({
+        adDomain: sanitized
+    })
+});
+
+userInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^\w.\-@]/g, '');
+    rsg.setState({
+        user: sanitized
+    })
+});
+
+passwordInput.addEventListener("input", (e) => {
+    rsg.setState({
+        password: e.target.value
+    })
+});
+
+ntHashInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^a-fA-F0-9]/g, '');
+    rsg.setState({
+        nthash: sanitized
+    })
+});
+
+serviceUserInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^\w.\-@]/g, '');
+    rsg.setState({
+        user: sanitized
+    })
+});
+
+servicePasswordInput.addEventListener("input", (e) => {
+    rsg.setState({
+        password: e.target.value
+    })
+});
+
 
 shellSelect.addEventListener("change", (e) => {
     rsg.setState({
@@ -603,14 +772,9 @@ document.querySelector('#inc-port').addEventListener('click', () => {
     })
 })
 
-document.querySelector('#listener-advanced-switch').addEventListener('change', rsg.updateSwitchStates);
 document.querySelector('#revshell-advanced-switch').addEventListener('change', rsg.updateSwitchStates);
 
 setInterval(rsg.updateSwitchStates, 500) // fix switch changes in rapid succession
-
-document.querySelector('#copy-listener').addEventListener('click', () => {
-    rsg.copyToClipboard(listenerCommand.innerText)
-})
 
 document.querySelector('#copy-reverse-shell-command').addEventListener('click', () => {
     rsg.copyToClipboard(reverseShellCommand.innerText)
