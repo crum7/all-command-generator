@@ -26,35 +26,112 @@ const updateContextFields = (commandType) => {
     const allContextFields = document.querySelectorAll('.context-fields');
     allContextFields.forEach(field => field.style.display = 'none');
 
-    // Update main field labels based on context
+    // Get references to main field containers
+    const domainContainer = document.querySelector('#domain-container');
+    const fqdnContainer = document.querySelector('#fqdn-container');
+    const cidrContainer = document.querySelector('#cidr-container');
     const domainLabel = document.querySelector('#domain-label');
     const fqdnLabel = document.querySelector('#fqdn-label');
+    const adDomainField = document.querySelector('#ad-domain-field');
+    const userField = document.querySelector('#user-field');
+    const passwordField = document.querySelector('#password-field');
+    const adHashRow = document.querySelector('#ad-hash-row');
+    const serviceUserField = document.querySelector('#service-user-field');
+    const servicePasswordField = document.querySelector('#service-password-field');
+    const webFields = document.querySelector('#web-fields');
+    const contextSwitchWrapper = document.querySelector('#context-switch-wrapper');
+    const advancedSwitchContent = document.querySelector('#advanced-switch-content');
+    const kerberosSwitchContent = document.querySelector('#kerberos-switch-content');
 
+    const show = (el, display = 'block') => {
+        if (el) {
+            el.style.display = display;
+            el.classList.remove('d-none');
+        }
+    };
+    const hide = (el) => {
+        if (el) {
+            el.style.display = 'none';
+            el.classList.add('d-none');
+        }
+    };
+
+    hide(domainContainer);
+    hide(fqdnContainer);
+    hide(cidrContainer);
+    if (webFields) hide(webFields);
+    hide(adDomainField);
+    hide(userField);
+    hide(passwordField);
+    hide(adHashRow);
+    hide(serviceUserField);
+    hide(servicePasswordField);
+    hide(contextSwitchWrapper);
+    hide(advancedSwitchContent);
+    hide(kerberosSwitchContent);
+
+    // Show/hide main fields based on context
     switch (commandType) {
+        case CommandType.ReverseShell:
+        case CommandType.BindShell:
+        case CommandType.MSFVenom:
+        case CommandType.HoaxShell:
+            // Only IP & Port visible
+            if (domainLabel) domainLabel.textContent = 'Domain';
+            if (fqdnLabel) fqdnLabel.textContent = 'FQDN';
+            break;
+
         case CommandType.WEB:
-            document.querySelector('#web-fields').style.display = 'block';
-            domainLabel.textContent = 'Web Domain';
-            fqdnLabel.textContent = 'Web FQDN';
+            show(domainContainer);
+            if (webFields) show(webFields);
+            if (domainLabel) domainLabel.textContent = 'Web Domain';
+            if (fqdnLabel) fqdnLabel.textContent = 'FQDN';
             break;
+
         case CommandType.ActiveDirectory:
-            document.querySelector('#ad-domain-field').style.display = 'block';
-            document.querySelector('#user-field').style.display = 'block';
-            document.querySelector('#password-field').style.display = 'block';
-            document.querySelector('#ad-hash-row').style.display = 'block';
-            domainLabel.textContent = 'Domain';
-            fqdnLabel.textContent = 'FQDN';
+            show(domainContainer);
+            show(fqdnContainer);
+            show(cidrContainer);
+            show(adDomainField);
+            show(userField);
+            show(passwordField);
+            show(adHashRow, 'flex');
+            if (domainLabel) domainLabel.textContent = 'Domain';
+            if (fqdnLabel) fqdnLabel.textContent = 'FQDN';
             break;
+
         case CommandType.CommonService:
-            document.querySelector('#service-user-field').style.display = 'block';
-            document.querySelector('#service-password-field').style.display = 'block';
-            domainLabel.textContent = 'Domain';
-            fqdnLabel.textContent = 'FQDN';
+            show(domainContainer);
+            show(fqdnContainer);
+            show(cidrContainer);
+            show(serviceUserField);
+            show(servicePasswordField);
+            if (domainLabel) domainLabel.textContent = 'Domain';
+            if (fqdnLabel) fqdnLabel.textContent = 'FQDN';
             break;
+
         default:
-            domainLabel.textContent = 'Domain';
-            fqdnLabel.textContent = 'FQDN';
+            // Default: show all main fields
+            show(domainContainer);
+            show(fqdnContainer);
+            show(cidrContainer);
+            if (domainLabel) domainLabel.textContent = 'Domain';
+            if (fqdnLabel) fqdnLabel.textContent = 'FQDN';
             break;
     }
+
+    // Show appropriate switch based on command type
+    if (commandType === CommandType.ReverseShell ||
+        commandType === CommandType.BindShell ||
+        commandType === CommandType.MSFVenom ||
+        commandType === CommandType.HoaxShell) {
+        show(contextSwitchWrapper, 'flex');
+        show(advancedSwitchContent, 'flex');
+    } else if (commandType === CommandType.ActiveDirectory) {
+        show(contextSwitchWrapper, 'flex');
+        show(kerberosSwitchContent, 'flex');
+    }
+    // For Web and CommonService tabs, the entire context switch wrapper remains hidden
 };
 const reverseShellCommand = document.querySelector("#reverse-shell-command");
 const bindShellCommand = document.querySelector("#bind-shell-command");
@@ -169,11 +246,29 @@ for (const button of rawLinkButtons) {
     });
 }
 
-const filterCommandData = function (data, { commandType, filterOperatingSystem = FilterOperatingSystemType.All, filterText = '' }) {
+const filterCommandData = function (data, { commandType, filterOperatingSystem = FilterOperatingSystemType.All, filterText = '', useKerberos = false }) {
     const filtered = data.filter(item => {
 
         if (!item.meta.includes(commandType)) {
             return false;
+        }
+
+        // Kerberos filtering for Active Directory commands
+        if (commandType === CommandType.ActiveDirectory) {
+            const isKerberosCommand = item.meta.includes('kerberos');
+            const hasNonKerberosVariant = data.some(otherItem =>
+                otherItem.name === item.name.replace(' (kerberos)', '') ||
+                otherItem.name === item.name + ' (kerberos)'
+            );
+
+            // If Kerberos is enabled, show only Kerberos versions when available
+            if (useKerberos && hasNonKerberosVariant && !isKerberosCommand) {
+                return false;
+            }
+            // If Kerberos is disabled, show only non-Kerberos versions when available
+            if (!useKerberos && hasNonKerberosVariant && isKerberosCommand) {
+                return false;
+            }
         }
 
         var hasOperatingSystemMatch = (filterOperatingSystem === FilterOperatingSystemType.All) || item.meta.includes(filterOperatingSystem);
@@ -228,6 +323,7 @@ const rsg = {
     password: query.get('password') || localStorage.getItem('password') || '',
     nthash: (query.get('nthash') || localStorage.getItem('nthash') || '').replace(/[^a-fA-F0-9]/g, ''),
     favorites: JSON.parse(localStorage.getItem('favorites') || '{}'),
+    useKerberos: JSON.parse(localStorage.getItem('useKerberos') || 'false'),
     payload: query.get('payload') || localStorage.getItem('payload') || 'windows/x64/meterpreter/reverse_tcp',
     payload: query.get('type') || localStorage.getItem('type') || 'cmd-curl',
     shell: query.get('shell') || localStorage.getItem('shell') || rsgData.shells[0],
@@ -453,6 +549,9 @@ const rsg = {
         rsg.syncFieldValues()
         // Initialize context fields
         updateContextFields(rsg.commandType);
+        // Force update to ensure Kerberos switch visibility
+        setTimeout(() => updateContextFields(rsg.commandType), 100);
+        rsg.update();
     },
 
     syncFieldValues: () => {
@@ -468,6 +567,12 @@ const rsg = {
         ntHashInput.value = rsg.nthash;
         serviceUserInput.value = rsg.user;
         servicePasswordInput.value = rsg.password;
+
+        // Sync Kerberos switch
+        const kerberosSwitch = document.querySelector("#kerberos-switch");
+        if (kerberosSwitch) {
+            kerberosSwitch.checked = rsg.useKerberos;
+        }
     },
 
 
@@ -513,6 +618,7 @@ const rsg = {
         rsg.updateTabList()
         rsg.updateReverseShellCommand()
         rsg.updateValues()
+        updateContextFields(rsg.commandType);
     },
 
     updateValues: () => {
@@ -542,7 +648,8 @@ const rsg = {
             {
                 filterOperatingSystem:  rsg.filterOperatingSystem,
                 filterText: rsg.filterText,
-                commandType: rsg.commandType
+                commandType: rsg.commandType,
+                useKerberos: rsg.useKerberos
             }
         );
 
@@ -644,14 +751,11 @@ const rsg = {
     },
 
     updateSwitchStates: () => {
-        $('#revshell-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
-            'hide')
-        $('#web-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
-            'hide')
-        $('#active-directory-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
-            'hide')
-        $('#common-service-advanced').collapse($('#revshell-advanced-switch').prop('checked') ? 'show' :
-            'hide')
+        // Only update revshell advanced since it's the only tab with an advanced switch
+        const revshellSwitch = $('#revshell-advanced-switch');
+        if (revshellSwitch.length) {
+            $('#revshell-advanced').collapse(revshellSwitch.prop('checked') ? 'show' : 'hide');
+        }
     }
 }
 
@@ -746,6 +850,16 @@ servicePasswordInput.addEventListener("input", (e) => {
         password: e.target.value
     })
 });
+
+// Kerberos switch event listener
+const kerberosSwitch = document.querySelector("#kerberos-switch");
+if (kerberosSwitch) {
+    kerberosSwitch.addEventListener("change", (e) => {
+        rsg.setState({
+            useKerberos: e.target.checked
+        });
+    });
+}
 
 
 shellSelect.addEventListener("change", (e) => {

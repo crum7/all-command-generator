@@ -229,8 +229,22 @@ a[href*="t3l3machus"] {
 }
 
 .middle-card {
-    min-height: 500px; 
-    max-height: 100%; 
-    overflow-y: auto; 
-    padding: 1.5rem; 
+    min-height: 500px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.ip-port-card {
+    min-height: 240px;
+}
+
+.favorite-star {
+    transition: color 0.2s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.favorite-star:hover {
+    color: #ffd700 !important;
+    transform: scale(1.1);
 }

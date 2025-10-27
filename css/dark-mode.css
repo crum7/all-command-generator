@@ -260,3 +260,7 @@ button {
     color: #ffd700 !important;
     transform: scale(1.1);
 }
+
+.ip-port-card {
+    min-height: 240px;
+}
