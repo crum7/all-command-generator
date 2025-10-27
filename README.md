@@ -34,7 +34,7 @@ This fork focuses on a friendlier UI/UX and a self-contained front-end:
 
 ### Screenshot
 
-![image](https://user-images.githubusercontent.com/70012972/169376352-e6d6b90e-2e2e-46b0-b6f9-0e3f13713e39.png)
+![image](https://github.com/crum7/reverse-shell-plus-pentest-generator/blob/main/docs/all_command_generator.png?raw=true)
 
 ## Dev
 
