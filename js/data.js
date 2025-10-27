@@ -602,38 +602,28 @@ const webCommands = withCommandType(
     CommandType.WEB,
     [
         {
-            "name": "Gobuster Directory",
-            "command": "gobuster dir -u http://{ip}:{port}/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt",
-            "meta": ["linux", "mac"]
-        },
-        {
             "name": "WhatWeb",
             "command": "whatweb http://{ip}:{port}/",
             "meta": ["linux", "mac"]
         },
         {
             "name": "Nikto",
-            "command": "nikto -h http://{ip}",
+            "command": "nikto -h http://{ip}:{port}",
             "meta": ["linux", "mac", "windows"]
         },
         {
-            "name": "DS Store Discovery",
-            "command": "wget https://github.com/lijiejie/ds_store_exp/raw/refs/heads/master/ds_store_exp.py\npip install ds-store requests\npython ds_store_exp.py http://{ip}/.DS_Store",
+            "name": "Feroxbuster",
+            "command": "feroxbuster -u http://{ip}:{port} -C 404 -C 500",
             "meta": ["linux", "mac"]
         },
         {
-            "name": "Feroxbuster",
-            "command": "feroxbuster -u http://{domain} -C 404 -C 500",
+            "name": "Gobuster Directory",
+            "command": "gobuster dir -u http://{ip}:{port}/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt",
             "meta": ["linux", "mac"]
         },
         {
             "name": "dirsearch web scan",
-            "command": "sudo dirsearch --url=http://{fqdn} --wordlist=/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt --threads 30 --random-agent --format=simple",
-            "meta": ["linux", "mac"]
-        },
-        {
-            "name": "gobuster directory advanced",
-            "command": "sudo gobuster dir -u https://{fqdn}/dev/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt -x php -k",
+            "command": "sudo dirsearch --url=http://{ip}:{port} --wordlist=/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt --threads 30 --random-agent --format=simple",
             "meta": ["linux", "mac"]
         },
         {
@@ -672,15 +662,21 @@ const webCommands = withCommandType(
             "meta": ["linux", "mac"]
         },
         {
-            "name": "curl post request",
-            "command": "curl http://{fqdn}:{port}/admin/admin.php -X POST -d 'id={id}' -H 'Content-Type: application/x-www-form-urlencoded'",
-            "meta": ["linux", "mac", "windows"]
+            "name": "DS Store Discovery",
+            "command": "wget https://github.com/lijiejie/ds_store_exp/raw/refs/heads/master/ds_store_exp.py\npip install ds-store requests\npython ds_store_exp.py http://{ip}/.DS_Store",
+            "meta": ["linux", "mac"]
         },
         {
-            "name": "gobuster vhost scan",
+            "name": "Gobuster directory advanced",
+            "command": "sudo gobuster dir -u https://{fqdn}/dev/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt -x php -k",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "Gobuster vhost scan",
             "command": "gobuster vhost -u http://{ip} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain",
             "meta": ["linux", "mac"]
         },
+
         {
             "name": "recon spider",
             "command": "python3 ReconSpider.py http://{fqdn}",
@@ -688,18 +684,13 @@ const webCommands = withCommandType(
         },
         {
             "name": "xsstrike scanner",
-            "command": "python3 -m venv venv\nsource venv/bin/activate\npython xsstrike.py -u \"http://{fqdn}/login?msg=\"",
+            "command": "python3 -m venv venv\nsource venv/bin/activate\npython xsstrike.py -u \"http://{ip}:{port}/login?msg=\"",
             "meta": ["linux", "mac"]
         },
         {
             "name": "xsstrike post scan",
-            "command": "python xsstrike.py -u \"http://{fqdn}/dashboard\" --data \"title=test&description=test\" --headers \"Cookie: session={cookie}\"",
+            "command": "python xsstrike.py -u \"http://{ip}:{port}/dashboard\" --data \"title=test&description=test\" --headers \"Cookie: session={cookie}\"",
             "meta": ["linux", "mac"]
-        },
-        {
-            "name": "sql injection test",
-            "command": "curl \"http://{fqdn}/{path}?id='\"",
-            "meta": ["linux", "mac", "windows"]
         },
         {
             "name": "eyewitness screenshot",
@@ -713,7 +704,7 @@ const webCommands = withCommandType(
         },
         {
             "name": "certificate transparency",
-            "command": "curl -s \"https://crt.sh/?q={domain}&output=json\" | jq -r '.[] | select(.name_value | contains(\"dev\")) | .name_value' | sort -u",
+            "command": "curl -s \"https://crt.sh/?q={ip}:{port}&output=json\" | jq -r '.[] | select(.name_value | contains(\"dev\")) | .name_value' | sort -u",
             "meta": ["linux", "mac"]
         },
         {
@@ -745,7 +736,12 @@ const webCommands = withCommandType(
             "name": "burp suite launch",
             "command": "JAVA_CMD=$(readlink -f /usr/lib/jvm/java-21-openjdk-$(uname -m)/bin/java) && JAVA_CMD=$JAVA_CMD burpsuite",
             "meta": ["linux", "mac"]
-        }
+        },
+        {
+            "name": "curl post request",
+            "command": "curl http://{fqdn}:{port}/admin/admin.php -X POST -d 'id={id}' -H 'Content-Type: application/x-www-form-urlencoded'",
+            "meta": ["linux", "mac", "windows"]
+        },
     ]
 );
 

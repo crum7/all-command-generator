@@ -42,6 +42,7 @@ const updateContextFields = (commandType) => {
     const contextSwitchWrapper = document.querySelector('#context-switch-wrapper');
     const advancedSwitchContent = document.querySelector('#advanced-switch-content');
     const kerberosSwitchContent = document.querySelector('#kerberos-switch-content');
+    const domainSwitchContent = document.querySelector('#domain-switch-content');
 
     const show = (el, display = 'block') => {
         if (el) {
@@ -69,6 +70,7 @@ const updateContextFields = (commandType) => {
     hide(contextSwitchWrapper);
     hide(advancedSwitchContent);
     hide(kerberosSwitchContent);
+    hide(domainSwitchContent);
 
     // Show/hide main fields based on context
     switch (commandType) {
@@ -130,8 +132,11 @@ const updateContextFields = (commandType) => {
     } else if (commandType === CommandType.ActiveDirectory) {
         show(contextSwitchWrapper, 'flex');
         show(kerberosSwitchContent, 'flex');
+    } else if (commandType === CommandType.WEB) {
+        show(contextSwitchWrapper, 'flex');
+        show(domainSwitchContent, 'flex');
     }
-    // For Web and CommonService tabs, the entire context switch wrapper remains hidden
+    // For CommonService tab, the entire context switch wrapper remains hidden
 };
 const reverseShellCommand = document.querySelector("#reverse-shell-command");
 const bindShellCommand = document.querySelector("#bind-shell-command");
@@ -246,7 +251,7 @@ for (const button of rawLinkButtons) {
     });
 }
 
-const filterCommandData = function (data, { commandType, filterOperatingSystem = FilterOperatingSystemType.All, filterText = '', useKerberos = false }) {
+const filterCommandData = function (data, { commandType, filterOperatingSystem = FilterOperatingSystemType.All, filterText = '', useKerberos = false, useDomain = false }) {
     const filtered = data.filter(item => {
 
         if (!item.meta.includes(commandType)) {
@@ -311,6 +316,23 @@ const getDefaultSelectionForType = function (commandType) {
     return items.length > 0 ? items[0].name : '';
 };
 
+const commandTypeValues = Object.values(CommandType);
+const commandOrderMap = rsgData.reverseShellCommands.reduce((map, item, index) => {
+    const itemTypes = item.meta.filter((meta) => commandTypeValues.includes(meta));
+    if (itemTypes.length === 0) {
+        return map;
+    }
+
+    itemTypes.forEach((type) => {
+        const key = `${type}::${item.name}`;
+        if (map[key] === undefined) {
+            map[key] = index;
+        }
+    });
+
+    return map;
+}, Object.create(null));
+
 const rsg = {
     ip: (query.get('ip') || localStorage.getItem('ip') || '10.10.10.10').replace(/[^a-zA-Z0-9.\-/:]/g, ''),
     port: parsePortOrDefault(query.get('port') || localStorage.getItem('port')),
@@ -324,6 +346,7 @@ const rsg = {
     nthash: (query.get('nthash') || localStorage.getItem('nthash') || '').replace(/[^a-fA-F0-9]/g, ''),
     favorites: JSON.parse(localStorage.getItem('favorites') || '{}'),
     useKerberos: JSON.parse(localStorage.getItem('useKerberos') || 'false'),
+    useDomain: JSON.parse(localStorage.getItem('useDomain') || 'false'),
     payload: query.get('payload') || localStorage.getItem('payload') || 'windows/x64/meterpreter/reverse_tcp',
     payload: query.get('type') || localStorage.getItem('type') || 'cmd-curl',
     shell: query.get('shell') || localStorage.getItem('shell') || rsgData.shells[0],
@@ -436,16 +459,24 @@ const rsg = {
     },
 
     sortWithFavorites: (items, commandType) => {
+        const orderFor = (commandName) => {
+            const key = `${commandType}::${commandName}`;
+            const order = commandOrderMap[key];
+            return order === undefined ? Number.MAX_SAFE_INTEGER : order;
+        };
+
         return items.sort((a, b) => {
             const aIsFav = rsg.isFavorite(commandType, a.name);
             const bIsFav = rsg.isFavorite(commandType, b.name);
+            const orderA = orderFor(a.name);
+            const orderB = orderFor(b.name);
 
             // Favorites first
             if (aIsFav && !bIsFav) return -1;
             if (!aIsFav && bIsFav) return 1;
 
-            // Within same category (both favorite or both not), sort alphabetically
-            return a.name.localeCompare(b.name);
+            // Within same category, preserve original ordering from data.js
+            return orderA - orderB;
         });
     },
 
@@ -573,6 +604,12 @@ const rsg = {
         if (kerberosSwitch) {
             kerberosSwitch.checked = rsg.useKerberos;
         }
+
+        // Sync Domain switch
+        const domainSwitch = document.querySelector("#domain-switch");
+        if (domainSwitch) {
+            domainSwitch.checked = rsg.useDomain;
+        }
     },
 
 
@@ -601,7 +638,26 @@ const rsg = {
     },
 
     insertParameters: (command, encoder) => {
-        return command
+        let template = command;
+        if (rsg.commandType === CommandType.WEB && rsg.useDomain) {
+            console.log('Replacing IP:Port with Domain for command:', command);
+            // Handle highlighted parameters (with HTML spans)
+            const ipSpan = '<span class="highlighted-parameter">{ip}</span>';
+            const portSpan = '<span class="highlighted-parameter">{port}</span>';
+            const domainSpan = '<span class="highlighted-parameter">{domain}</span>';
+
+            template = template
+                .replaceAll(`https://${ipSpan}:${portSpan}`, `https://${domainSpan}`)
+                .replaceAll(`http://${ipSpan}:${portSpan}`, `http://${domainSpan}`)
+                .replaceAll(`${ipSpan}:${portSpan}`, domainSpan)
+                // Also handle non-highlighted versions as fallback
+                .replaceAll('https://{ip}:{port}', 'https://{domain}')
+                .replaceAll('http://{ip}:{port}', 'http://{domain}')
+                .replaceAll('{ip}:{port}', '{domain}');
+            console.log('Result after replacement:', template);
+        }
+
+        return template
             .replaceAll(encoder('{ip}'), encoder(rsg.getIP()))
             .replaceAll(encoder('{port}'), encoder(String(rsg.getPort())))
             .replaceAll(encoder('{shell}'), encoder(rsg.getShell()))
@@ -649,7 +705,8 @@ const rsg = {
                 filterOperatingSystem:  rsg.filterOperatingSystem,
                 filterText: rsg.filterText,
                 commandType: rsg.commandType,
-                useKerberos: rsg.useKerberos
+                useKerberos: rsg.useKerberos,
+                useDomain: rsg.useDomain
             }
         );
 
@@ -857,6 +914,16 @@ if (kerberosSwitch) {
     kerberosSwitch.addEventListener("change", (e) => {
         rsg.setState({
             useKerberos: e.target.checked
+        });
+    });
+}
+
+// Domain switch event listener
+const domainSwitch = document.querySelector("#domain-switch");
+if (domainSwitch) {
+    domainSwitch.addEventListener("change", (e) => {
+        rsg.setState({
+            useDomain: e.target.checked
         });
     });
 }
