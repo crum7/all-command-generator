@@ -268,7 +268,7 @@ button {
 /* Live2D Character Styles */
 #live2d-container {
     position: fixed;
-    bottom: 12px;
+    bottom: -16px;
     left: 0;
     width: 250px;
     height: 380px;
@@ -284,6 +284,16 @@ button {
     pointer-events: auto;
     border-radius: 10px;
     background: transparent;
+}
+
+#live2d-canvas:focus {
+    outline: none;
+}
+
+#live2d-container.live2d-disabled,
+#live2d-container.live2d-disabled #live2d-canvas,
+#live2d-container.live2d-disabled .live2d-comment {
+    pointer-events: none !important;
 }
 
 .live2d-comment {

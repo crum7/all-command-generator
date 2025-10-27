@@ -18,6 +18,7 @@ https://revshells.com
 - LocalStorage to persist your configuration
 - Dark, Light and Meme Modes
 - HoaxShell integration with custom listener (see link below for more information) | Credit: https://github.com/t3l3machus
+- Interactive Live2D assistant that responds to clicks with motions and comments (ships with bundled offline assets so it works without external CDNs)
 
 ### HoaxShell Listener Docs
 
@@ -45,6 +46,17 @@ docker run -d -p 80:80 reverse_shell_generator
 ```
 
 Browse to http://localhost:80
+
+### Live2D Companion
+
+The interface now includes a Live2D character that offers quick encouragement while you build payloads.
+
+- Assets live in `assets/live2d/` and are served locally (no outbound CDN requests required).
+- Behaviour and comments can be customised in `js/live2d.js`.
+- The model adapts to the selected theme (dark / light / meme) and keeps animation quality high by rendering at double density.
+- The bundled model is 「桃瀬ひより」 provided on the official Live2D sample page (https://www.live2d.com/learn/sample/).
+
+If you prefer a static UI, you can hide the container by removing or commenting out the block around `#live2d-container` in `index.html`.
 
 ## Contributors ✨
 

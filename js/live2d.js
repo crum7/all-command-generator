@@ -1,4 +1,6 @@
 // Live2D integration using pixi-live2d-display
+let live2dCharacterInstance = null;
+
 class Live2DCharacter {
     constructor() {
         this.app = null;
@@ -7,6 +9,11 @@ class Live2DCharacter {
         this.commentElement = document.getElementById('live2d-comment');
         this.commentTimeout = null;
         this.baseScale = 1;
+
+        if (this.canvas) {
+            this.canvas.setAttribute('tabindex', '-1');
+            this.canvas.setAttribute('aria-hidden', 'true');
+        }
 
         this.motionGroups = [
             'Tap',
@@ -223,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ready) {
             console.log('Live2D libraries ready, initializing character...');
             const live2dCharacter = new Live2DCharacter();
+            live2dCharacterInstance = live2dCharacter;
             window.addEventListener('resize', () => live2dCharacter.handleResize());
             return;
         }
@@ -241,9 +249,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const initSimpleCharacter = () => {
         const character = new SimpleCharacter();
         window.addEventListener('resize', () => character.handleResize());
+        live2dCharacterInstance = null;
     };
 
     waitForLibraries();
+});
+
+document.addEventListener('pointerdown', (event) => {
+    if (
+        !live2dCharacterInstance ||
+        !live2dCharacterInstance.canvas ||
+        !live2dCharacterInstance.model
+    ) {
+        return;
+    }
+
+    const rect = live2dCharacterInstance.canvas.getBoundingClientRect();
+    const container = document.getElementById('live2d-container');
+    const isDisabled = container?.classList.contains('live2d-disabled');
+
+    if (
+        !isDisabled &&
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+    ) {
+        live2dCharacterInstance.onInteraction();
+    }
 });
 
 // Simple fallback character using PIXI.js only
