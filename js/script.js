@@ -258,20 +258,12 @@ const filterCommandData = function (data, { commandType, filterOperatingSystem =
             return false;
         }
 
-        // Kerberos filtering for Active Directory commands
         if (commandType === CommandType.ActiveDirectory) {
-            const isKerberosCommand = item.meta.includes('kerberos');
-            const hasNonKerberosVariant = data.some(otherItem =>
-                otherItem.name === item.name.replace(' (kerberos)', '') ||
-                otherItem.name === item.name + ' (kerberos)'
-            );
-
-            // If Kerberos is enabled, show only Kerberos versions when available
-            if (useKerberos && hasNonKerberosVariant && !isKerberosCommand) {
+            const isKerberos = item.meta.includes('kerberos');
+            if (useKerberos && !isKerberos) {
                 return false;
             }
-            // If Kerberos is disabled, show only non-Kerberos versions when available
-            if (!useKerberos && hasNonKerberosVariant && isKerberosCommand) {
+            if (!useKerberos && isKerberos) {
                 return false;
             }
         }
