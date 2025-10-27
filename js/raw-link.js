@@ -31,6 +31,15 @@ const RawLink = {
         queryParams.set('port', rsg.getPort());
         queryParams.set('shell', rsg.getShell());
         queryParams.set('encoding', rsg.getShell());
+        if (rsg.getDomain()) {
+            queryParams.set('domain', rsg.getDomain());
+        }
+        if (rsg.getFQDN()) {
+            queryParams.set('fqdn', rsg.getFQDN());
+        }
+        if (rsg.getCIDR()) {
+            queryParams.set('cidr', rsg.getCIDR());
+        }
 
         return `/${encodeURIComponent(name)}?${queryParams}`
     },

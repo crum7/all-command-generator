@@ -2,6 +2,9 @@
 // Element selectors
 const ipInput = document.querySelector("#ip");
 const portInput = document.querySelector("#port");
+const domainInput = document.querySelector("#domain");
+const fqdnInput = document.querySelector("#fqdn");
+const cidrInput = document.querySelector("#cidr");
 const listenerSelect = document.querySelector("#listener-selection");
 const shellSelect = document.querySelector("#shell");
 // const autoCopySwitch = document.querySelector("#auto-copy-switch");
@@ -157,8 +160,11 @@ const getDefaultSelectionForType = function (commandType) {
 };
 
 const rsg = {
-    ip: (query.get('ip') || localStorage.getItem('ip') || '10.10.10.10').replace(/[^a-zA-Z0-9.\-]/g, ''),
+    ip: (query.get('ip') || localStorage.getItem('ip') || '10.10.10.10').replace(/[^a-zA-Z0-9.\-/:]/g, ''),
     port: parsePortOrDefault(query.get('port') || localStorage.getItem('port')),
+    domain: (query.get('domain') || localStorage.getItem('domain') || '').replace(/[^\w.\-]/g, ''),
+    fqdn: (query.get('fqdn') || localStorage.getItem('fqdn') || '').replace(/[^\w.\-]/g, ''),
+    cidr: (query.get('cidr') || localStorage.getItem('cidr') || '').replace(/[^0-9a-zA-Z.\-/:]/g, ''),
     payload: query.get('payload') || localStorage.getItem('payload') || 'windows/x64/meterpreter/reverse_tcp',
     payload: query.get('type') || localStorage.getItem('type') || 'cmd-curl',
     shell: query.get('shell') || localStorage.getItem('shell') || rsgData.shells[0],
@@ -233,6 +239,12 @@ const rsg = {
     getShell: () => rsg.shell,
 
     getEncoding: () => rsg.encoding,
+
+    getDomain: () => rsg.domain,
+
+    getFQDN: () => rsg.fqdn,
+
+    getCIDR: () => rsg.cidr,
 
     getSelectedCommandName: () => {
         return rsg.selectedValues[rsg.commandType];
@@ -316,8 +328,9 @@ const rsg = {
     },
 
     highlightParameters: (text, encoder) => {
-        const parameters = ['{ip}', '{port}', '{shell}', encodeURI('{ip}'), encodeURI('{port}'),
-            encodeURI('{shell}')
+        const parameters = ['{ip}', '{port}', '{shell}', '{domain}', '{fqdn}', '{cidr}',
+            encodeURI('{ip}'), encodeURI('{port}'), encodeURI('{shell}'),
+            encodeURI('{domain}'), encodeURI('{fqdn}'), encodeURI('{cidr}')
         ];
 
         parameters.forEach((param) => {
@@ -377,6 +390,9 @@ const rsg = {
             .replaceAll(encoder('{ip}'), encoder(rsg.getIP()))
             .replaceAll(encoder('{port}'), encoder(String(rsg.getPort())))
             .replaceAll(encoder('{shell}'), encoder(rsg.getShell()))
+            .replaceAll(encoder('{domain}'), encoder(rsg.getDomain()))
+            .replaceAll(encoder('{fqdn}'), encoder(rsg.getFQDN()))
+            .replaceAll(encoder('{cidr}'), encoder(rsg.getCIDR()));
     },
 
     update: () => {
@@ -404,6 +420,9 @@ const rsg = {
 
         ipInput.value = rsg.ip;
         portInput.value = rsg.port;
+        domainInput.value = rsg.domain;
+        fqdnInput.value = rsg.fqdn;
+        cidrInput.value = rsg.cidr;
         operatingSystemSelect.value = rsg.filterOperatingSystem;
         searchBox.value = rsg.filterText;
     },
@@ -418,6 +437,10 @@ const rsg = {
                 commandType: rsg.commandType
             }
         );
+
+        const listSelectionSelector = rsg.uiElements[rsg.commandType].listSelection;
+        const listElement = document.querySelector(listSelectionSelector);
+        const previousScrollTop = listElement ? listElement.scrollTop : 0;
 
         const documentFragment = document.createDocumentFragment();
         if (filteredItems.length === 0) {
@@ -451,8 +474,10 @@ const rsg = {
             documentFragment.appendChild(selectionButton);
         })
 
-        const listSelectionSelector = rsg.uiElements[rsg.commandType].listSelection;
-        document.querySelector(listSelectionSelector).replaceChildren(documentFragment)
+        if (listElement) {
+            listElement.replaceChildren(documentFragment);
+            listElement.scrollTop = previousScrollTop;
+        }
     },
 
     updateListenerCommand: () => {
@@ -463,6 +488,9 @@ const rsg = {
         command = command.replace('{ip}', rsg.getIP())
         command = command.replace('{payload}', rsg.getPayload())
         command = command.replace('{type}', rsg.getType())
+        command = command.replace('{domain}', rsg.getDomain())
+        command = command.replace('{fqdn}', rsg.getFQDN())
+        command = command.replace('{cidr}', rsg.getCIDR())
 
         if (rsg.getPort() < 1024) {
             privilegeWarning.style.visibility = "visible";
@@ -511,15 +539,37 @@ rsg.update();
     * Event handlers/functions
     */
 ipInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^0-9a-zA-Z.\-/:]/g, '');
     rsg.setState({
-        ip: e.target.value
-        })
+        ip: sanitized
+    })
 });
 
 portInput.addEventListener("input", (e) => {
     const value = e.target.value.length === 0 ? '0' : e.target.value;
     rsg.setState({
         port: parsePortOrDefault(value, rsg.getPort())
+    })
+});
+
+domainInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^\w.\-]/g, '');
+    rsg.setState({
+        domain: sanitized
+    })
+});
+
+fqdnInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^\w.\-]/g, '');
+    rsg.setState({
+        fqdn: sanitized
+    })
+});
+
+cidrInput.addEventListener("input", (e) => {
+    const sanitized = e.target.value.replace(/[^0-9a-zA-Z.\-/:]/g, '');
+    rsg.setState({
+        cidr: sanitized
     })
 });
 

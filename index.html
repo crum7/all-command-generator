@@ -67,7 +67,7 @@
                 style="font-size:1rem">Theme</label>
 
             <select class="custom-select" id="theme-selector">
-                <option class="os-item" value="dark">Dark</option>
+                <option class="os-item" value="dracula">Dracula</option>
                 <option class="os-item" value="light">Light</option>
                 <option class="os-item" value="meme">Meme</option>
             </select>
@@ -92,7 +92,7 @@
                         <div class="card-text h-100">
                             <form class="row justify-content-center align-items-center h-100">
 
-                                <!-- IP -->
+                                                                <!-- IP -->
                                 <div class="col-auto mt-4">
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -120,6 +120,39 @@
                                                 +1
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+
+<!-- Domain -->
+                                <div class="col-12 mt-4">
+                                    <div class="input-group w-100">
+                                        <div class="input-group-prepend">
+                                            <span id="domain-label" class="input-group-text">Domain</span>
+                                        </div>
+                                        <input id="domain" type="text" class="form-control form-control-lg text-center"
+                                            aria-label="Domain" aria-describedby="domain-label">
+                                    </div>
+                                </div>
+
+                                <!-- FQDN -->
+                                <div class="col-12 mt-4">
+                                    <div class="input-group w-100">
+                                        <div class="input-group-prepend">
+                                            <span id="fqdn-label" class="input-group-text">FQDN</span>
+                                        </div>
+                                        <input id="fqdn" type="text" class="form-control form-control-lg text-center"
+                                            aria-label="FQDN" aria-describedby="fqdn-label">
+                                    </div>
+                                </div>
+
+                                <!-- CIDR -->
+                                <div class="col-12 mt-4">
+                                    <div class="input-group w-100">
+                                        <div class="input-group-prepend">
+                                            <span id="cidr-label" class="input-group-text">CIDR</span>
+                                        </div>
+                                        <input id="cidr" type="text" class="form-control form-control-lg text-center"
+                                            aria-label="CIDR" aria-describedby="cidr-label">
                                     </div>
                                 </div>
 

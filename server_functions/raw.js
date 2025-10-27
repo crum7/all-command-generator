@@ -7,18 +7,24 @@ const insertParameters = function (command, params) {
 
     if (command === "PowerShell #3 (Base64)") {
         return "powershell -e " + btoa(rsgData.specialCommands['PowerShell payload']
-            .replace(encoder('{ip}'), encoder(params.ip))
-            .replace(encoder('{port}'), encoder(String(params.port))))
+            .replace(encoder('{ip}'), encoder(params.ip || ''))
+            .replace(encoder('{port}'), encoder(String(params.port || '')))
+            .replace(encoder('{domain}'), encoder(params.domain || ''))
+            .replace(encoder('{fqdn}'), encoder(params.fqdn || ''))
+            .replace(encoder('{cidr}'), encoder(params.cidr || '')))
     }
 
     return command
-        .replace(encoder('{ip}'), encoder(params.ip))
-        .replace(encoder('{port}'), encoder(String(params.port)))
-        .replace(encoder('{shell}'), encoder(params.shell))
+        .replace(encoder('{ip}'), encoder(params.ip || ''))
+        .replace(encoder('{port}'), encoder(String(params.port || '')))
+        .replace(encoder('{shell}'), encoder(params.shell || ''))
+        .replace(encoder('{domain}'), encoder(params.domain || ''))
+        .replace(encoder('{fqdn}'), encoder(params.fqdn || ''))
+        .replace(encoder('{cidr}'), encoder(params.cidr || ''))
 }
 
 const generateCommand = function (event, _context) {
-    const { path, queryStringParameters } = event;
+    const { path, queryStringParameters = {} } = event;
 
     const requiredName = decodeURIComponent(path.substring(1));
     const selectedItem = rsgData.reverseShellCommands.find(function ({ name }) {
